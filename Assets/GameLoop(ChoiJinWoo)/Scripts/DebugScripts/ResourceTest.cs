@@ -108,5 +108,13 @@ public class ResourceTest : MonoBehaviour
                 }
             }
         }
+
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+        {
+            foreach(var facility in obj)
+            {
+                facility.TakeDamage(100);
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using VContainer;
 
 public class UiManager : MonoBehaviour
 {

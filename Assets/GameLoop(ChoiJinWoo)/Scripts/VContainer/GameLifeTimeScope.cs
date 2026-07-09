@@ -7,14 +7,27 @@ public class GameLifeTimeScope : LifetimeScope
     [SerializeField] private ResourcesManager resourcesManagerPrefab;
     [SerializeField] private CitizenManager citizenManagerPrefab;
     [SerializeField] private UiManager UiManagerPrefab;
+    [SerializeField] private EnviromentManager EnviromentManagerPrefab;
     [SerializeField] private Canvas UiManagerParent;
+    [SerializeField] private Light sunLight;
 
     protected override void Configure(IContainerBuilder builder)
     {
         builder.RegisterComponentInNewPrefab(resourcesManagerPrefab, Lifetime.Singleton).AsSelf();
         builder.RegisterComponentInNewPrefab(citizenManagerPrefab, Lifetime.Singleton).AsSelf();
         builder.RegisterComponentInNewPrefab(UiManagerPrefab, Lifetime.Singleton).UnderTransform(UiManagerParent.transform).AsSelf();
+        builder.RegisterComponentInNewPrefab(EnviromentManagerPrefab, Lifetime.Singleton)
+               .AsSelf();
+
+        // 생성된 인스턴스에 씬의 sunLight를 넘겨주는 콜백
+        builder.RegisterBuildCallback(resolver =>
+        {
+            var toggle = resolver.Resolve<EnviromentManager>();
+            toggle.SetSunLight(sunLight);
+        });
+
         builder.RegisterComponentInHierarchy<ResourceTest>();
         builder.RegisterComponentInHierarchy<TopBar>();
+        builder.RegisterComponentInHierarchy<DayNightButton>();
     }
 }

@@ -11,8 +11,9 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
     private int maxWorker;
     private float maxHp;
     private float currentHp;
-    ResourcesManager resourcesManager;
-    CitizenManager citizenManager;
+    private ResourcesManager resourcesManager;
+    private EnviromentManager enviromentManager;
+    private CitizenManager citizenManager;
     public ProductionType ProductionType => basicValue.Type;
 
     public event Action<int, int> OnWorkerChanged;
@@ -44,6 +45,12 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
         this.citizenManager = citizenManager;
     }
 
+    [Inject]
+    public void Construct(EnviromentManager enviromentManager)
+    {
+        this.enviromentManager = enviromentManager;
+    }
+
     private void Awake()
     {
         productAmount = basicValue.DefaultAmount;
@@ -57,8 +64,21 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
         }
     }
 
+    private void Start()
+    {
+        enviromentManager.OnDay += ProduceProduction;
+    }
+
+    private void OnDestroy()
+    {
+        enviromentManager.OnDay -= ProduceProduction;
+    }
+
     public void IncreaseWorker()
     {
+        if (citizenManager == null)
+            return;
+
         if(workerAmount < maxWorker && citizenManager.CheckCanUseCitizen())
         {
             workerAmount++;
@@ -69,7 +89,10 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
 
     public void DecreaseWorker()
     {
-        if(workerAmount > 0)
+        if (citizenManager == null)
+            return;
+
+        if (workerAmount > 0)
         {
             workerAmount--;
             UpdateWorker();
@@ -84,12 +107,13 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
 
     public void ProduceProduction()
     {
-        if (!isCrashed)
+        if (!isCrashed && resourcesManager != null)
         {
             resourcesManager.ProductChanged(basicValue.Type, productAmount * workerAmount);
         }
 
         Hp = maxHp;
+        isCrashed = false;
     }
 
     public void TakeDamage(int damage)
@@ -98,6 +122,7 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
         if(Hp <= 0f)
         {
             isCrashed = true;
+            Debug.Log("파괴됨");
         }
     }
 
