@@ -18,6 +18,7 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
     private bool[] skillRunning;
     private CancellationTokenSource skillCts;
     public float Hp { get; protected set; }
+    public float MaxHp { get; protected set; }
     public int Defense { get; protected set; }
     public int AttackPower { get; protected set; }
     public float AttackSpeed { get; protected set; }
@@ -37,12 +38,14 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
 
     protected virtual void OnEnable()
     {
+        EnemyRegistry.Register(this);
         skillCts = new CancellationTokenSource();
         RunSkillLoop(skillCts.Token).Forget();
     }
 
     protected virtual void OnDisable()
     {
+        EnemyRegistry.Unregister(this);
         skillCts?.Cancel();
         skillCts?.Dispose();
         skillCts = null;
@@ -118,13 +121,13 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
         AttackSpeed = data.AttackSpeed;
         Range = data.Range;
         Defense = data.Defense;
+        MaxHp = data.Health;
         Hp = data.Health;
         MoveSpeed = data.MoveSpeed;
         Type = ParseType(data.Type);
         IsDie = false;
     }
 
-    // CSV의 Type 문자열 → EnemyType. 비어있거나 못 읽으면 Normal.
     private static EnemyType ParseType(string raw)
     {
         if (!string.IsNullOrEmpty(raw) && System.Enum.TryParse(raw.Trim(), true, out EnemyType type))
@@ -141,6 +144,13 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
 
     }
 
+    // 힐 (MaxHp 초과 안 함)
+    public void Heal(float amount)
+    {
+        if (IsDie || amount <= 0f) return;
+        Hp = Mathf.Min(Hp + amount, MaxHp);
+    }
+
     public virtual void Attack()
     {
         //대충 공격
@@ -153,6 +163,7 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
         //대충 죽는거
     }
 
+    // Ai한테 부탁한 예시
     // ===================== 예시용 (실제 로직 아님) =====================
     // 고른 방식: [공유 HP 풀] + [오라(동적)] 보호막
     //  - 공유 HP : 보호막 HP가 하나. 범위 안 누가 맞든 이 HP가 깎이고, 0되면 전원 해제

@@ -15,6 +15,7 @@ public class SkillTable : DataTable
         public float? Damage { get; set; }
         public float? TickInterval { get; set; }
         public float? Value { get; set; }
+        public float? ValueScale { get; set; }   // 스테이지당 Value 증가량 (힐 등)
         public float? Distance { get; set; }
         public string Desc{get ; set ;}
     }

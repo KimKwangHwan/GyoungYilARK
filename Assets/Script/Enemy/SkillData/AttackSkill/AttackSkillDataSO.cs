@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 public class AttackSkillDataSO : SkillDataSO
 {
     public float damage;
-    
 
     public override async UniTask Execute(EnemyBase owner)
     {

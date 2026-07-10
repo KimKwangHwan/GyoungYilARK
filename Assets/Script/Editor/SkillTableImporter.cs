@@ -76,7 +76,8 @@ public static class SkillTableImporter
             switch (type)
             {
                 case "Dash": return typeof(DashSkillDataSO);
-                case "Summon": return typeof(SummonSkillDataSO); // 나중에 스킬 추가
+                case "Summon": return typeof(SummonSkillDataSO);
+                case "Heal": return typeof(HealSkillDataSO); // 나중에 스킬 추가
             }
         }
         return null;
@@ -105,6 +106,12 @@ public static class SkillTableImporter
             case SummonSkillDataSO summon:
                 summon.value = d.Value ?? 0f;          // value = 소환 수
                 summon.tickInterval = d.TickInterval ?? 0f;
+                break;
+
+            case HealSkillDataSO heal:
+                heal.value = d.Value ?? 0f;            // value = 틱당 기본 힐량
+                heal.valueScale = d.ValueScale ?? 0f;  // 스테이지당 증가
+                heal.tickInterval = d.TickInterval ?? 0f;
                 break;
         }
     }

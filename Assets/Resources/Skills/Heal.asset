@@ -9,12 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60d13cba1dcce42489304db7528a3d12, type: 3}
-  m_Name: SpiderBite
-  m_EditorClassIdentifier: Assembly-CSharp::AttackSkillDataSO
-  skillName: Skill_SpiderBite
+  m_Script: {fileID: 11500000, guid: 45e0080f8591eb64a85cf70cb0887831, type: 3}
+  m_Name: Heal
+  m_EditorClassIdentifier: Assembly-CSharp::HealSkillDataSO
+  skillName: Skill_Heal
   cooldown: 1
   duration: 0
-  range: 1
-  tickInterval: 0.5
-  damage: 15
+  range: 2
+  tickInterval: 0
+  value: 5
+  valueScale: 1

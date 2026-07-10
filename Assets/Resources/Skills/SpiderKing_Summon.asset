@@ -16,7 +16,7 @@ MonoBehaviour:
   cooldown: 10
   duration: 0
   range: 0
-  value: 2
   tickInterval: 0
+  value: 2
   summonPrefab: {fileID: 3353861975194064123, guid: 2a5778e8d141966409d644543791d71b, type: 3}
   spawnRadius: 2

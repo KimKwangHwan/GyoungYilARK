@@ -1,4 +1,5 @@
-SkillId,Category,Type,NameKey,Cooldown,Duration,Range,Damage,TickInterval,Value,Distance,Desc
-SpiderBite,Attack,None,Skill_SpiderBite,1,0,1,15,0.5,,,Desc_SpiderBite
-SpiderToxin_Dash,Utility,Dash,Skill_SpiderToxin_Dash,2,0.3,0,,,,3,Desc_SpiderToxin_Dash
-SpiderKing_Summon,Utility,Summon,Skill_SpiderKing_Summon,10,0,0,,,2,,Desc_SpiderKing_Summon
+SkillId,Category,Type,NameKey,Cooldown,Duration,Range,Damage,TickInterval,Value,ValueScale,Distance,Desc
+SpiderBite,Attack,None,Skill_SpiderBite,1,0,1,15,0.5,,,,Desc_SpiderBite
+SpiderToxin_Dash,Utility,Dash,Skill_SpiderToxin_Dash,2,0.3,0,,,,,3,Desc_SpiderToxin_Dash
+SpiderKing_Summon,Utility,Summon,Skill_SpiderKing_Summon,10,0,0,,,2,,,Desc_SpiderKing_Summon
+Heal,Utility,Heal,Skill_Heal,1.0,0,2,,,5,1,,Desc_Heal
