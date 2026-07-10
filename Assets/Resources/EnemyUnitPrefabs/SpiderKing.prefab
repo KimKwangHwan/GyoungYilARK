@@ -470,7 +470,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpiderKing
   enemyKey: 
+  skills: []
   animator: {fileID: 0}
+  hp: 0
+  speed: 0
+  attack: 0
+  def: 0
 --- !u!1 &2351674644725468116
 GameObject:
   m_ObjectHideFlags: 0

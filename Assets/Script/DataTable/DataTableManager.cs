@@ -20,6 +20,9 @@ public static class DataTableManager
         var waveTable = new WaveTable();
         waveTable.Load(DataTableIds.Wave);
         tables.Add(DataTableIds.Wave, waveTable);
+        var skillTable = new SkillTable();
+        skillTable.Load(DataTableIds.Skill);
+        tables.Add(DataTableIds.Skill, skillTable);
     }
     public static T Get<T>(string id) where T : DataTable
     {

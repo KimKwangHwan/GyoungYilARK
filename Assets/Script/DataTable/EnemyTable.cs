@@ -14,6 +14,8 @@ public class EnemyTable : DataTable
         public float MoveSpeed {get ; set ;}
         public int UpHealthScale {get ; set ;}
         public int UpDefenseScale {get ; set ;}
+        public string Skills {get ; set ;}   // 세미콜론(;)으로 구분된 SkillId 목록
+        public string Type {get ; set ;}     // EnemyType 이름 (Normal, Elite, Boss)
     }
     
     private readonly Dictionary<string, Data> table = new();

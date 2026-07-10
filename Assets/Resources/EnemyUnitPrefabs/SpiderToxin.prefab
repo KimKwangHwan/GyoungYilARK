@@ -373,6 +373,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpiderToxin
   enemyKey: 
+  skills: []
   animator: {fileID: 2132314309153364529}
   hp: 0
   speed: 0

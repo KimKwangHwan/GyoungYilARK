@@ -1,4 +1,4 @@
-Name,Attack,AttackSpeed,Range,Defense,Health,MoveSpeed,UpHealthScale,UpDefenseScale
-SpiderNormal,10,1,1,1,100,5,10,1
-SpiderToxin,15,1.5,1,2,80,6,8,1
-SpiderKing,30,1,2,5,500,4,150,2,
+Name,Attack,AttackSpeed,Range,Defense,Health,MoveSpeed,UpHealthScale,UpDefenseScale,Skills,Type
+SpiderNormal,10,1,1,1,100,5,10,1,SpiderBite,Normal
+SpiderToxin,15,1.5,1,2,80,6,8,1,SpiderToxin_Dash,Normal
+SpiderKing,30,1,2,5,500,4,150,2,SpiderKing_Summon,Elite

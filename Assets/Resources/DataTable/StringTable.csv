@@ -5,3 +5,10 @@ LanguageEn,영어,English,英語
 LanguageJp,일본어,Japan,日本語
 SpiderNormal,거미,Spider,蜘蛛
 SpiderToxin,독거미,Toxic Spider,毒蜘蛛
+SpiderKing,여왕 거미,Queen Spider,女王蜘蛛
+Skill_SpiderBite,물기,Bite,噛みつき
+Skill_SpiderToxin_Dash,독거미 대시,Toxic Spider Dash,毒蜘蛛ダッシュ
+Skill_SpiderKing_Summon,여왕 거미 소환,Queen Spider Summon,女王蜘蛛召喚
+Desc_SpiderBite,적을 물어 피해를 준다,Bites the enemy to deal damage,敵を噛んでダメージを与える
+Desc_SpiderToxin_Dash,독거미가 일정거리 빠르게 이동을 한다,The toxic spider dashes a set distance quickly,毒蜘蛛が一定距離を素早く移動する
+Desc_SpiderKing_Summon,여왕 거미가 거미를 소환한다,The Spider Queen summons spiders,女王蜘蛛が蜘蛛を召喚する
