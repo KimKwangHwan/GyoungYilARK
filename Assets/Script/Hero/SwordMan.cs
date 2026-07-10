@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class SwordMan : Hero
 {
+    
     protected override void Awake()
     {
         base.Awake();

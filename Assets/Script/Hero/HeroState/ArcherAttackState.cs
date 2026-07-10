@@ -8,17 +8,4 @@ public class ArcherAttackState : HeroAttackState
     {
         this.archer = archer;
     }
-
-    protected override void PlayAttack()
-    {
-        base.PlayAttack();
-        archer.ArrowAnim.SetTrigger(HeroAnimHash.attack);
-        archer.BowAnim.SetTrigger(HeroAnimHash.attack);
-    }
-
-    protected override async UniTask Attack()
-    {
-        await WaitForAnimEvent("Attack", attackCts.Token);
-        Debug.Log("Archer Attack");
-    }
 }
