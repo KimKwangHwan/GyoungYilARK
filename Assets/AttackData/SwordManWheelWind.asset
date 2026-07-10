@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e694f9b884fb750469e6d85c9e8dc1ae, type: 3}
-  m_Name: MeleeAttack
+  m_Name: SwordManWheelWind
   m_EditorClassIdentifier: Assembly-CSharp::MeleeAttackDataSO
   range: 1
   attackSpeed: 1.5
-  attackType: 0
+  attackType: 1
+  animTrigger: Attack

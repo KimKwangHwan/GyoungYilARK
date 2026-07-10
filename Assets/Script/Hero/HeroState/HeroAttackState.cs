@@ -39,4 +39,9 @@ public class HeroAttackState : HeroState
         if (aimVector.sqrMagnitude > 0.00001f)
             hero.transform.rotation = Quaternion.LookRotation(aimVector);
     }
+
+    protected virtual void TryExecuteCurrentStep()
+    {
+        
+    }
 }

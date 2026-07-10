@@ -9,6 +9,10 @@ public abstract class AttackDataSO : ScriptableObject
     public int range = 3;
     public float attackSpeed = 1f;
     public AttackType attackType = AttackType.Single;
+    [SerializeField] private string animTrigger = "Attack";
+    private int? animHashCache;
+
+    protected int AnimHash => (animHashCache ??= Animator.StringToHash(animTrigger));
 
     public virtual bool CanExecute(AttackContext ctx)
     {

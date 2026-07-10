@@ -7,9 +7,9 @@ public class RangedAttackDataSO : AttackDataSO
 {
     public override async UniTask Execute(AttackContext ctx, CancellationToken ct)
     {
-        ctx.anim.SetTrigger(HeroAnimHash.attack);
-        ctx.bowAnim.SetTrigger(HeroAnimHash.attack);
-        ctx.arrowAnim.SetTrigger(HeroAnimHash.attack);
+        ctx.anim.SetTrigger(AnimHash);
+        ctx.bowAnim.SetTrigger(AnimHash);
+        ctx.arrowAnim.SetTrigger(AnimHash);
         await ctx.WaitForAnimEvent("Attack", ct);
         Debug.Log("Ranged Attack");
     }

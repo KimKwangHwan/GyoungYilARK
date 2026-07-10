@@ -8,6 +8,8 @@ public class Hero : MonoBehaviour, IDamageAble
     public AttackDataSO AttackData => attackData;
     protected AttackContext context;
     public AttackContext Context => context;
+    [SerializeField] private AttackPatternDataSO attackPattern;
+    public AttackPatternDataSO AttackPattern => attackPattern;
 
     public float Hp => throw new System.NotImplementedException();
 

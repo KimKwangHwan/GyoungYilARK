@@ -421,6 +421,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Archer
   attackData: {fileID: 11400000, guid: d5ba9effbda798f4b912df92b42511c7, type: 2}
+  attackPattern: {fileID: 0}
   anim: {fileID: 6616087275108663170}
   animEvents: {fileID: 6655098897044754716}
   attackSpeed: 1.5
@@ -496,6 +497,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordMan
   attackData: {fileID: 11400000, guid: f34d527312665f6429e04bb2c9307781, type: 2}
+  attackPattern: {fileID: 11400000, guid: a02e8fca792afa04297048fb6a884f4b, type: 2}
   anim: {fileID: 3232737769467548735}
   animEvents: {fileID: 3232737769467548736}
   attackSpeed: 1
@@ -4287,7 +4289,7 @@ Transform:
   m_Children:
   - {fileID: 6366229478202490184}
   m_Father: {fileID: 8553006252474851168}
-  m_LocalEulerAnglesHint: {x: -0.64240545, y: 178.36484, z: -21.574114}
+  m_LocalEulerAnglesHint: {x: -10.71731, y: 171.66507, z: -48.12203}
 --- !u!1 &1354092401086505967
 GameObject:
   m_ObjectHideFlags: 0
@@ -4430,7 +4432,7 @@ Transform:
   - {fileID: 5360124896029108330}
   - {fileID: 7391370235122360367}
   m_Father: {fileID: 8553006252474851168}
-  m_LocalEulerAnglesHint: {x: 4.7730083, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 4.7730093, y: -90, z: 0}
 --- !u!1 &1485949828961847538
 GameObject:
   m_ObjectHideFlags: 0
@@ -10701,7 +10703,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8358171624173642820}
-  m_LocalEulerAnglesHint: {x: 4.053582, y: -165.15132, z: 169.93584}
+  m_LocalEulerAnglesHint: {x: 2.196506, y: -168.21754, z: 164.21251}
 --- !u!1 &3617506390953794664
 GameObject:
   m_ObjectHideFlags: 0
@@ -13284,7 +13286,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6366229478202490184}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 6.8264203}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 1.8853357}
 --- !u!33 &4527977088438629574
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -17043,7 +17045,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2795038094981393146}
-  m_LocalEulerAnglesHint: {x: -1.0607998, y: 12.19324, z: 4.7258425}
+  m_LocalEulerAnglesHint: {x: -2.196497, y: 11.782451, z: 16.870079}
 --- !u!23 &5748145511166184282
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -18819,7 +18821,7 @@ Transform:
   m_Children:
   - {fileID: 4525505864886685680}
   m_Father: {fileID: 1344227449775483487}
-  m_LocalEulerAnglesHint: {x: 0.24385208, y: -1.260537, z: 11.036238}
+  m_LocalEulerAnglesHint: {x: -2.0766397, y: -9.936056, z: -9.234289}
 --- !u!4 &6380474518144115411
 Transform:
   m_ObjectHideFlags: 0

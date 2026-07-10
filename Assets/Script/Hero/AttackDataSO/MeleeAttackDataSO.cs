@@ -8,7 +8,7 @@ public class MeleeAttackDataSO : AttackDataSO
 {
     public override async UniTask Execute(AttackContext ctx, CancellationToken ct)
     {
-        ctx.anim.SetTrigger(HeroAnimHash.attack);
+        ctx.anim.SetTrigger(AnimHash);
         await ctx.WaitForAnimEvent("Attack", ct);
         Debug.Log("Melee Attack");
     }
