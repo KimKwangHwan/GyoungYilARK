@@ -1,7 +1,7 @@
 using UnityEngine;
-using System.Collections;
 using Cysharp.Threading.Tasks;
 using System;
+using VContainer;
 
 public class EnviromentManager : MonoBehaviour
 {
@@ -21,8 +21,15 @@ public class EnviromentManager : MonoBehaviour
     [SerializeField] private Material nightSkybox;
 
     private bool isNight = false;
+    private GameManager gameManager;
 
     public event Action OnDay;
+
+    [Inject]
+    private void Construct(GameManager gameManager)
+    {
+        this.gameManager = gameManager;
+    }
 
     private void Start()
     {
@@ -73,7 +80,7 @@ public class EnviromentManager : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < transitionDuration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float t = elapsed / transitionDuration;
 
             sunLight.color = Color.Lerp(startColor, targetColor, t);
@@ -90,11 +97,13 @@ public class EnviromentManager : MonoBehaviour
         if (isNight)
         {
             SetNight();
+            gameManager.OnNight();
         }
         else
         {
             SetDay();
             OnDay?.Invoke();
+            gameManager.OnDay();
         }
     }
 }

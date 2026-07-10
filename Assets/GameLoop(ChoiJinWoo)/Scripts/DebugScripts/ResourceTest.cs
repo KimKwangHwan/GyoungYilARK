@@ -13,62 +13,97 @@ public class ResourceTest : MonoBehaviour
     private List<House> houses = new();
     private ResourcesManager manager;
     private UiManager uiManager;
+    private GameManager gameManager;
     private IObjectResolver resolver;
 
     [Inject]
-    public void Construct(IObjectResolver resolver)
+    private void Construct(IObjectResolver resolver, ResourcesManager resourcesManager, UiManager uiManager, GameManager gameManager)
     {
         this.resolver = resolver;
-    }
-
-    [Inject]
-    public void Construct(ResourcesManager resourcesManager)
-    {
         manager = resourcesManager;
-    }
-
-    [Inject]
-    public void Construct(UiManager uiManager)
-    {
         this.uiManager = uiManager;
+        this.gameManager = gameManager;
     }
 
     private void Update()
     {
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
-            Debug.Log("pressed");
-            obj.Add(resolver.Instantiate(facilityPrefabs[0]));
+            if (manager.CheckResources(facilityPrefabs[0].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(resolver.Instantiate(facilityPrefabs[0]));
+            else
+            {
+                if(gameManager.CanBuild)
+                    Debug.LogWarning("자원이 부족합니다.");
+                else
+                    Debug.LogWarning("밤에는 건설 할 수 없습니다.");
+            }
         }
 
         if (Keyboard.current.digit2Key.wasPressedThisFrame)
         {
-            Debug.Log("pressed");
-            obj.Add(resolver.Instantiate(facilityPrefabs[1]));
+            if (manager.CheckResources(facilityPrefabs[1].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(resolver.Instantiate(facilityPrefabs[1]));
+            else
+            {
+                if (gameManager.CanBuild)
+                    Debug.LogWarning("자원이 부족합니다.");
+                else
+                    Debug.LogWarning("밤에는 건설 할 수 없습니다.");
+            }
         }
 
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
-            Debug.Log("pressed");
-            obj.Add(resolver.Instantiate(facilityPrefabs[2]));
+            if (manager.CheckResources(facilityPrefabs[2].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(resolver.Instantiate(facilityPrefabs[2]));
+            else
+            {
+                if (gameManager.CanBuild)
+                    Debug.LogWarning("자원이 부족합니다.");
+                else
+                    Debug.LogWarning("밤에는 건설 할 수 없습니다.");
+            }
         }
 
         if (Keyboard.current.digit4Key.wasPressedThisFrame)
         {
-            Debug.Log("pressed");
-            obj.Add(resolver.Instantiate(facilityPrefabs[3]));
+            if (manager.CheckResources(facilityPrefabs[3].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(resolver.Instantiate(facilityPrefabs[3]));
+            else
+            {
+                if (gameManager.CanBuild)
+                    Debug.LogWarning("자원이 부족합니다.");
+                else
+                    Debug.LogWarning("밤에는 건설 할 수 없습니다.");
+            }
         }
 
         if (Keyboard.current.digit5Key.wasPressedThisFrame)
         {
-            Debug.Log("pressed");
-            obj.Add(resolver.Instantiate(facilityPrefabs[4]));
+            if (manager.CheckResources(facilityPrefabs[4].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(resolver.Instantiate(facilityPrefabs[4]));
+            else
+            {
+                if (gameManager.CanBuild)
+                    Debug.LogWarning("자원이 부족합니다.");
+                else
+                    Debug.LogWarning("밤에는 건설 할 수 없습니다.");
+            }
         }
 
         if (Keyboard.current.digit6Key.wasPressedThisFrame)
         {
-            Debug.Log("pressed");
-            houses.Add(resolver.Instantiate(housePrefabs[Random.Range(0, housePrefabs.Count)]));
+            var house = housePrefabs[Random.Range(0, housePrefabs.Count)];
+            if (manager.CheckResources(house.Resources) && gameManager.CanBuild)
+                houses.Add(resolver.Instantiate(house));
+            else
+            {
+                if (gameManager.CanBuild)
+                    Debug.LogWarning("자원이 부족합니다.");
+                else
+                    Debug.LogWarning("밤에는 건설 할 수 없습니다.");
+            }
         }
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -97,24 +132,18 @@ public class ResourceTest : MonoBehaviour
             }
         }
 
-        if (Keyboard.current.aKey.wasPressedThisFrame)
-        {
-            Debug.Log("pressed");
-            if (obj != null)
-            {
-                foreach(var item in obj)
-                {
-                    item.ProduceProduction();
-                }
-            }
-        }
-
         if (Keyboard.current.qKey.wasPressedThisFrame)
         {
             foreach(var facility in obj)
             {
                 facility.TakeDamage(100);
             }
+        }
+
+        if (Keyboard.current.tKey.wasPressedThisFrame)
+        {
+            if (!gameManager.CanBuild)
+                gameManager.OnResult();
         }
     }
 }

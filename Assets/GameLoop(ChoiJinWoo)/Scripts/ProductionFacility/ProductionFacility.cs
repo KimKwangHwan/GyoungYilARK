@@ -4,7 +4,7 @@ using VContainer;
 
 public class ProductionFacility : MonoBehaviour, IDamageAble
 {
-    [SerializeField] ProductionValue basicValue;
+    [SerializeField] private ProductionValue basicValue;
     private int productAmount;
     private bool isCrashed = false;
     private int workerAmount = 0;
@@ -14,9 +14,11 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
     private ResourcesManager resourcesManager;
     private EnviromentManager enviromentManager;
     private CitizenManager citizenManager;
+    private FacilityManager facilityManager;
     public ProductionType ProductionType => basicValue.Type;
 
     public event Action<int, int> OnWorkerChanged;
+    public ProductionValue BasicValue => basicValue;
 
 
     public float Hp
@@ -34,21 +36,12 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
     public int Defense => 0;
 
     [Inject]
-    public void Construct(ResourcesManager resourcesManager)
+    private void Construct(ResourcesManager resourcesManager, CitizenManager citizenManager, EnviromentManager enviromentManager, FacilityManager facilityManager)
     {
         this.resourcesManager = resourcesManager;
-    }
-
-    [Inject]
-    public void Construct(CitizenManager citizenManager)
-    {
         this.citizenManager = citizenManager;
-    }
-
-    [Inject]
-    public void Construct(EnviromentManager enviromentManager)
-    {
-        this.enviromentManager = enviromentManager;
+        this. enviromentManager = enviromentManager;
+        this.facilityManager = facilityManager;
     }
 
     private void Awake()
@@ -57,21 +50,17 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
         maxWorker = basicValue.DefaultMaxWorker;
         maxHp = basicValue.DefaultHp;
         currentHp = maxHp;
-
-        foreach(var type in basicValue.ConstructProduct)
-        {
-            resourcesManager.ProductChanged(type, -basicValue.ConstructAmount[basicValue.ConstructProduct.IndexOf(type)]);
-        }
     }
 
     private void Start()
     {
-        enviromentManager.OnDay += ProduceProduction;
+        resourcesManager.ProductChanged(basicValue.ConstructProduct);
+        facilityManager.AddFacility(this);
     }
 
     private void OnDestroy()
     {
-        enviromentManager.OnDay -= ProduceProduction;
+        facilityManager.RemoveFacility(this);
     }
 
     public void IncreaseWorker()
@@ -105,13 +94,22 @@ public class ProductionFacility : MonoBehaviour, IDamageAble
         OnWorkerChanged?.Invoke(workerAmount, maxWorker);
     }
 
-    public void ProduceProduction()
+    public (ProductionType, int) ProduceProduction()
     {
         if (!isCrashed && resourcesManager != null)
         {
-            resourcesManager.ProductChanged(basicValue.Type, productAmount * workerAmount);
+            Recover();
+            return (basicValue.Type, productAmount * workerAmount);
         }
+        else
+        {
+            Recover();
+            return default;
+        }
+    }
 
+    private void Recover()
+    {
         Hp = maxHp;
         isCrashed = false;
     }

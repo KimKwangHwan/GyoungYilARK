@@ -22,6 +22,26 @@ public class ProductionValue : ScriptableObject
     public int DefaultAmount => defaultAmount;
     public int DefaultHp => defaulthp;
     public int DefaultMaxWorker => defaultMaxWorker;
-    public List<ProductionType> ConstructProduct => constructProduct;
-    public List<int> ConstructAmount => constructAmount;
+    public Dictionary<ProductionType, int> ConstructProduct
+    { 
+        get
+        {
+            if(constructProduct.Count != constructAmount.Count)
+            {
+                Debug.LogError("생산 건물에 필요한 자원과 자원량이 매칭되지 않습니다. 다시 설정해주세요");
+                return null;
+            }
+            else
+            {
+                Dictionary<ProductionType, int> temp = new();
+
+                for (int i = 0; i < constructProduct.Count; i++)
+                {
+                    temp[constructProduct[i]] = -constructAmount[i];
+                }
+
+                return temp;
+            }
+        }
+    }
 }

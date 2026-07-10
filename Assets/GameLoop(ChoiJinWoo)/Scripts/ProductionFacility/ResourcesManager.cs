@@ -17,72 +17,48 @@ public class ResourcesManager : MonoBehaviour
         ProductUpdate?.Invoke(wood, stone, iron, gold, food);
     }
 
-    public void ProductChanged(ProductionType type, int amount)
+    public void ProductChanged(Dictionary<ProductionType, int> products)
     {
-        switch (type)
-        {
-            case ProductionType.Wood:
-                if(wood + amount < 0)
-                {
-                    Debug.Log("건설 불가능");
-                    return;
-                }
-                wood += amount;
-                break;
-            case ProductionType.Food:
-                if (food + amount < 0)
-                {
-                    Debug.Log("건설 불가능");
-                    return;
-                }
-                food += amount;
-                break;
-            case ProductionType.Gold:
-                if (gold + amount < 0)
-                {
-                    Debug.Log("건설 불가능");
-                    return;
-                }
-                gold += amount;
-                break;
-            case ProductionType.Iron:
-                if (iron + amount < 0)
-                {
-                    Debug.Log("건설 불가능");
-                    return;
-                }
-                iron += amount;
-                break;
-            case ProductionType.Stone:
-                if (stone + amount < 0)
-                {
-                    Debug.Log("건설 불가능");
-                    return;
-                }
-                stone += amount;
-                break;
-        }
+        if(products.ContainsKey(ProductionType.Wood))
+            wood += products[ProductionType.Wood];
+        if (products.ContainsKey(ProductionType.Food))
+            food += products[ProductionType.Food];
+        if (products.ContainsKey(ProductionType.Gold))
+            gold += products[ProductionType.Gold];
+        if (products.ContainsKey(ProductionType.Iron))
+            iron += products[ProductionType.Iron];
+        if (products.ContainsKey(ProductionType.Stone))
+            stone += products[ProductionType.Stone];
 
         ProductUpdate?.Invoke(wood, stone, iron, gold, food);
     }
 
-    public bool TryBuild(List<ProductionType> types, List<int> amounts)
+    public bool CheckResources(Dictionary<ProductionType, int> resources)
     {
-        foreach(var type in types)
+        if (resources.ContainsKey(ProductionType.Wood))
         {
-            switch (type)
-            {
-                case ProductionType.Wood:
-                    return wood - amounts[types.IndexOf(type)] < 0 ? false : true;
-                case ProductionType.Food:
-                    return food - amounts[types.IndexOf(type)] < 0 ? false : true;
-                case ProductionType.Gold:
-                    return gold - amounts[types.IndexOf(type)] < 0 ? false : true;
-                case ProductionType.Iron:
-                    return iron - amounts[types.IndexOf(type)] < 0 ? false : true;
-                case ProductionType.Stone:
-                    return stone - amounts[types.IndexOf(type)] < 0 ? false : true;
-            }
+            if (-resources[ProductionType.Wood] > wood)
+                return false;
+        }
+        if (resources.ContainsKey(ProductionType.Stone))
+        {
+            if (-resources[ProductionType.Stone] > stone)
+                return false;
+        }
+        if (resources.ContainsKey(ProductionType.Gold))
+        {
+            if (-resources[ProductionType.Gold] > gold)
+                return false;
+        }
+        if (resources.ContainsKey(ProductionType.Iron))
+        {
+            if (-resources[ProductionType.Iron] > iron)
+                return false;
+        }
+        if (resources.ContainsKey(ProductionType.Food))
+        {
+            if (-resources[ProductionType.Food] > food)
+                return false;
         }
 
         return true;

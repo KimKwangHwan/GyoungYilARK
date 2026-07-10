@@ -8,6 +8,8 @@ public class GameLifeTimeScope : LifetimeScope
     [SerializeField] private CitizenManager citizenManagerPrefab;
     [SerializeField] private UiManager UiManagerPrefab;
     [SerializeField] private EnviromentManager EnviromentManagerPrefab;
+    [SerializeField] private GameManager GameManagerPrefab;
+    [SerializeField] private FacilityManager FacilityManagerPrefab;
     [SerializeField] private Canvas UiManagerParent;
     [SerializeField] private Light sunLight;
 
@@ -16,8 +18,9 @@ public class GameLifeTimeScope : LifetimeScope
         builder.RegisterComponentInNewPrefab(resourcesManagerPrefab, Lifetime.Singleton).AsSelf();
         builder.RegisterComponentInNewPrefab(citizenManagerPrefab, Lifetime.Singleton).AsSelf();
         builder.RegisterComponentInNewPrefab(UiManagerPrefab, Lifetime.Singleton).UnderTransform(UiManagerParent.transform).AsSelf();
-        builder.RegisterComponentInNewPrefab(EnviromentManagerPrefab, Lifetime.Singleton)
-               .AsSelf();
+        builder.RegisterComponentInNewPrefab(EnviromentManagerPrefab, Lifetime.Singleton).AsSelf();
+        builder.RegisterComponentInNewPrefab(GameManagerPrefab, Lifetime.Singleton).AsSelf();
+        builder.RegisterComponentInNewPrefab(FacilityManagerPrefab, Lifetime.Singleton).AsSelf();
 
         // 생성된 인스턴스에 씬의 sunLight를 넘겨주는 콜백
         builder.RegisterBuildCallback(resolver =>
@@ -29,5 +32,6 @@ public class GameLifeTimeScope : LifetimeScope
         builder.RegisterComponentInHierarchy<ResourceTest>();
         builder.RegisterComponentInHierarchy<TopBar>();
         builder.RegisterComponentInHierarchy<DayNightButton>();
+        builder.RegisterComponentInHierarchy<ExpeditionButton>();
     }
 }

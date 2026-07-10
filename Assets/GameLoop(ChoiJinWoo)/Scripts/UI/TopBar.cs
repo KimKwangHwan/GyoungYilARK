@@ -14,14 +14,9 @@ public class TopBar : MonoBehaviour
     private CitizenManager citizenManager;
 
     [Inject]
-    private void Construct(ResourcesManager resourcesManager)
+    private void Construct(ResourcesManager resourcesManager, CitizenManager citizenManager)
     {
         this.resourcesManager = resourcesManager;
-    }
-
-    [Inject]
-    private void Construct(CitizenManager citizenManager)
-    {
         this.citizenManager = citizenManager;
     }
 
