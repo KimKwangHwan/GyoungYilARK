@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum EnemyType
@@ -41,6 +42,7 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
         EnemyRegistry.Register(this);
         skillCts = new CancellationTokenSource();
         RunSkillLoop(skillCts.Token).Forget();
+        RunAttackLoop(skillCts.Token).Forget();
     }
 
     protected virtual void OnDisable()
@@ -77,6 +79,23 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
         skillRunning[index] = true;
         try { await skills[index].Execute(this); }
         finally { skillRunning[index] = false; }
+    }
+
+    // 기본공격 루프. AttackSpeed 를 초당 공격 횟수로 해석 (interval = 1/AttackSpeed).
+    private async UniTask RunAttackLoop(CancellationToken token)
+    {
+        float attackTimer = 0f;
+        while (!IsDie)
+        {
+            float interval = AttackSpeed > 0f ? 1f / AttackSpeed : 1f;
+            attackTimer += Time.deltaTime;
+            if (attackTimer >= interval)
+            {
+                attackTimer = 0f;
+                Attack();
+            }
+            await UniTask.Yield(token);
+        }
     }
 
     protected void LoadStats()
@@ -151,9 +170,17 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
         Hp = Mathf.Min(Hp + amount, MaxHp);
     }
 
+    // 기본공격: 사거리(Range 칸) 안 가장 가까운 영웅을 AttackPower 로 때림.
+    // 대상이 없으면 아무 일도 안 함. (HeroRegistry.Alive 가 비어있으면 안전하게 무시)
     public virtual void Attack()
     {
-        //대충 공격
+        if (IsDie) return;
+
+        var target = EnemyTargeting.FindNearest(
+            transform.position, Range, HeroRegistry.Alive, h => h.transform.position);
+        if (target == null) return;
+
+        target.TakeDamage(AttackPower);
     }
 
     public virtual void Die()

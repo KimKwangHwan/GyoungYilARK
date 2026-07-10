@@ -12,14 +12,13 @@ public class HealSkillDataSO : UtilitySkillDataSO
         float heal = value + valueScale * (CurrentStage() - 1);   // value = 기본 힐량
         if (heal <= 0f) return;
 
-        float sqrRange = range * range;
+        int cellRange = range > 0f ? Mathf.RoundToInt(range) : 1;
         Vector3 center = owner.transform.position;
 
         foreach (var ally in EnemyRegistry.Alive)
         {
             if (ally == null || ally.IsDie) continue;
-            //지금은 월드 거리 임시.
-            if ((ally.transform.position - center).sqrMagnitude > sqrRange) continue;
+            if (!EnemyTargeting.InRange(center, ally.transform.position, cellRange)) continue;
             ally.Heal(heal);
         }
         await UniTask.CompletedTask;

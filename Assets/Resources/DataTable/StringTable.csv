@@ -1,12 +1,12 @@
 ID,Kr,En,Jp
 HelloWorld,안녕,Hello,こんにちは
-MainMenu,메인 메뉴,Main Menu,メインメニュー
-Setting,설정,Setting,設定
-MasterVolume,전체 소리,MasterVolume,マスター音量
-Exit,나가기,Exit,終了
-Close,닫기,Close,閉じる
-Pause,일시 정지,Pause,一時停止
-Start,게임 시작,Game Start,ゲーム開始
+Ui_MainMenu,메인 메뉴,Main Menu,メインメニュー
+Ui_Setting,설정,Setting,設定
+Ui_MasterVolume,전체 소리,MasterVolume,マスター音量
+Ui_Exit,나가기,Exit,終了
+Ui_Close,닫기,Close,閉じる
+Ui_Pause,일시 정지,Pause,一時停止
+Ui_Start,게임 시작,Game Start,ゲーム開始
 LanguageKr,한국어,Korea,韓国語
 LanguageEn,영어,English,英語
 LanguageJp,일본어,Japan,日本語
@@ -21,3 +21,9 @@ Desc_SpiderBite,적을 물어 피해를 준다,Bites the enemy to deal damage,�
 Desc_SpiderToxin_Dash,독거미가 일정거리 빠르게 이동을 한다,The toxic spider dashes a set distance quickly,毒蜘蛛が一定距離を素早く移動する
 Desc_SpiderKing_Summon,여왕 거미가 거미를 소환한다,The Spider Queen summons spiders,女王蜘蛛が蜘蛛を召喚する
 Desc_Heal,일정 범위 내 아군을 지속 회복시킨다,Continuously heals allies within range,範囲内の味方を継続的に回復する
+Stat_Attack,공격력,Attack,攻撃力
+Stat_AttackSpeed,공격속도,AttackSpeed,攻撃速度
+Stat_Health,체력,Health,体力
+Stat_MoveSpeed,이동속도,MoveSpeed,移動速度
+Stat_Defense,방어력,Defense,防御力
+Stat_Range,사거리,Range,射程
