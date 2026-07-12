@@ -17,7 +17,13 @@ public struct AttackContext
         bool fired = false;
         System.Action handler = () => fired = true;
         animEvents.Subscribe(eventName, handler);
-        await UniTask.WaitUntil(() => fired, cancellationToken: ct);
-        animEvents.Unsubscribe(eventName, handler);
+        try
+        {
+            await UniTask.WaitUntil(() => fired, cancellationToken: ct);
+        }
+        finally
+        {
+            animEvents.Unsubscribe(eventName, handler);
+        }
     }
 }

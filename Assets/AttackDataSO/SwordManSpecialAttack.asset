@@ -9,8 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e69a29d4eca51c84a834cd73d8eb6ab4, type: 3}
-  m_Name: RangedAttackData
-  m_EditorClassIdentifier: Assembly-CSharp::RangedAttackDataSO
+  m_Script: {fileID: 11500000, guid: 3e63ecebd4cd6e044a8a127ea3df05bc, type: 3}
+  m_Name: SwordManSpecialAttack
+  m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   range: 3
-  attackSpeed: 1
+  attackType: 1
+  animTriggers:
+  - StrongAttack
+  selectMode: 0

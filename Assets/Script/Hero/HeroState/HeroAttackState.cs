@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
@@ -16,7 +15,6 @@ public class HeroAttackState : HeroState
     {
         timer = 0f;
         attackCts = new CancellationTokenSource();
-        hero.AttackData.Execute(hero.Context, attackCts.Token).Forget();
     }
 
     public override void Exit()

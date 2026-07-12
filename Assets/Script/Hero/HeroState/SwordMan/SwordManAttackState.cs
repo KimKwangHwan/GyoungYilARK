@@ -3,33 +3,35 @@ using UnityEngine;
 
 public class SwordManAttackState : HeroAttackState
 {
-    private int comboIndex = 0;
     private SwordMan swordMan;
-    public SwordManAttackState(SwordMan swordMan, HeroStateMachine stateMachine) : base(swordMan, stateMachine)
+    private HeroAttackRunner runner;
+
+    public SwordManAttackState(SwordMan swordMan, HeroStateMachine stateMachine)
+        : base(swordMan, stateMachine)
     {
         this.swordMan = swordMan;
+    }
+
+    public override void Enter()
+    {
+        base.Enter();
+        runner = new HeroAttackRunner(swordMan.BasePattern, swordMan.Selectors, swordMan.Procs, new MeleeAttackExecutor());
     }
 
     public override void Update()
     {
         base.Update();
         timer += Time.deltaTime;
-        if (timer >= hero.AttackData.attackSpeed)
+        if (timer >= swordMan.AttackSpeed)
         {
             timer = 0f;
-            //hero.AttackData.Execute(hero.Context, attackCts.Token).Forget();
             TryExecuteCurrentStep();
         }
     }
 
     protected override void TryExecuteCurrentStep()
     {
-        var step = swordMan.AttackPattern.GetStep(comboIndex);
-        if (step.CanExecute(swordMan.Context))
-        {
-            swordMan.Anim.SetInteger("ComboIndex", comboIndex % swordMan.AttackPattern.patterns.Length);
-            step.Execute(swordMan.Context, attackCts.Token).Forget();
-        }
-        comboIndex++;
+        if (runner.IsExecuting) return;
+        runner.ExecuteNext(swordMan.Context, attackCts.Token).Forget();
     }
 }
