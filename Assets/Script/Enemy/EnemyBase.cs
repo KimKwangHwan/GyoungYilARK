@@ -32,6 +32,47 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
     private float currentMovespeed;
     private bool isAttack;
 
+    [Header("Movement")]
+    [Tooltip("타일 윗면에서 유닛 피벗을 띄울 높이(월드). 유닛 크기에 맞게 조정.")]
+    [SerializeField] private float heightOffset = 0.5f;
+    [Tooltip("웨이포인트 도달 판정 거리의 제곱(작을수록 정확). 기본값 유지 권장.")]
+    [SerializeField] private float arriveSqr = 0.0004f;
+
+    // 이동 상태 — 스폰→본진 경로(웨이포인트)를 순서대로 따라간다.
+    public MapBoard Board { get; private set; }
+    private readonly List<Vector3> _path = new();
+    private int _pathIndex;
+    private Vector2Int _lastCell = new(int.MinValue, int.MinValue); // 직전 칸 — 바뀐 프레임에만 보드 갱신
+    private bool _moving;
+
+    public bool HasPath => _path.Count > 0;
+    public IReadOnlyList<Vector3> Path => _path; // 대시 등 경로 기준 스킬이 참조
+    public int PathIndex => _pathIndex;
+
+    /// <summary>대시/넉백 등으로 앞선 지점에 착지한 뒤, 정상 이동이 그 지점부터 이어지게 목표 인덱스를 맞춘다.</summary>
+    public void ResumeFrom(int index) => _pathIndex = Mathf.Clamp(index, 0, _path.Count - 1);
+
+    /// <summary>대시처럼 스킬이 직접 위치를 옮기는 동안 true — 일반 경로 이동이 위치를 덮어쓰지 않게 멈춘다.</summary>
+    public bool MovementSuspended { get; set; }
+
+    /// <summary>현재 위치에서 경로를 따라 dist(월드거리)만큼 앞선 지점. 경로 끝이면 마지막 점으로 클램프. landIndex=착지 세그먼트.</summary>
+    public Vector3 PointAhead(float dist, out int landIndex)
+    {
+        if (_path.Count == 0) { landIndex = -1; return transform.position; }
+
+        Vector3 pos = transform.position;
+        for (int i = _pathIndex; i < _path.Count; i++)
+        {
+            Vector3 seg = _path[i] - pos;
+            float len = seg.magnitude;
+            if (len >= dist) { landIndex = i; return pos + seg.normalized * dist; }
+            dist -= len;
+            pos = _path[i];
+        }
+        landIndex = _path.Count - 1; // 본진 도달 — 오버슈트 방지
+        return _path[^1];
+    }
+
     protected virtual void Awake()
     {
         LoadStats();
@@ -48,10 +89,119 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
     protected virtual void OnDisable()
     {
         EnemyRegistry.Unregister(this);
+        _moving = false;
+        if (Board != null) Board.RemoveEnemy(gameObject); // 어떤 경로로 사라지든 현재 칸에서 빠진다
         skillCts?.Cancel();
         skillCts?.Dispose();
         skillCts = null;
     }
+
+    // ---- 이동 (스폰→본진 경로 추종) ----
+
+    /// <summary>
+    /// 스폰 직후 스포너가 호출: MapBoard 주입 + 경로 이동 시작. waypoints를 주면 그대로 쓰고
+    /// (맵당 1회 계산해 공유하는 걸 권장), 비우면 보드에서 스폰→본진 경로를 직접 뽑는다.
+    /// snapToStart=true면 경로 시작(스폰)으로 스냅, false면 현재 위치를 유지하고
+    /// 가장 가까운 웨이포인트부터 이어간다(소환·중간 투입용).
+    /// </summary>
+    public void EnterMap(MapBoard board, IReadOnlyList<Vector3> waypoints = null, bool snapToStart = true)
+    {
+        Board = board;
+        _path.Clear();
+        _pathIndex = 0;
+        _moving = false;
+
+        if (board == null)
+        {
+            Debug.LogWarning($"[{name}] MapBoard가 주입되지 않아 이동할 수 없습니다.", this);
+            return;
+        }
+
+        // 웨이포인트는 타일 윗면 기준(offset 0)으로 받아, 유닛별 높이(heightOffset)만 여기서 더한다.
+        IReadOnlyList<Vector3> src = waypoints ?? board.GetWaypoints(0f);
+        foreach (Vector3 p in src) _path.Add(p  ); //+ Vector3.up* heightOffset
+
+        if (_path.Count == 0)
+        {
+            Debug.LogWarning($"[{name}] 스폰→본진 경로가 없습니다. (스폰/본진 배치·통행 지형 확인)", this);
+            return;
+        }
+
+        // MoveSpeed 기본값 0 = 제자리(이동 버그처럼 보이지만 대개 EnemyTable 행/로드 누락). 자가진단.
+        if (MoveSpeed <= 0f)
+            Debug.LogWarning($"[{name}] MoveSpeed={MoveSpeed} — 제자리에 멈춥니다. EnemyTable '{enemyKey}' 행 확인.", this);
+
+        _moving = true;
+        if (snapToStart)
+            transform.position = _path[0]; // 스폰 지점에서 시작
+        else
+            _pathIndex = NearestPathIndex(transform.position); // 현재 위치 유지, 가까운 지점부터 이어감
+
+        _lastCell = board.WorldToCell(transform.position);
+        board.MoveEnemy(gameObject, transform.position); // 현재 칸 등록
+    }
+
+    // 경로 중 현재 위치에서 가장 가까운 웨이포인트 인덱스(소환·중간 투입 시 시작점).
+    private int NearestPathIndex(Vector3 pos)
+    {
+        int best = 0;
+        float bestSqr = float.MaxValue;
+        for (int i = 0; i < _path.Count; i++)
+        {
+            float d = (_path[i] - pos).sqrMagnitude;
+            if (d < bestSqr) { bestSqr = d; best = i; }
+        }
+        return best;
+    }
+
+    protected virtual void Update()
+    {
+        MoveAlongPath();
+    }
+
+    private void MoveAlongPath()
+    {
+        if (!_moving || IsDie || Board == null || MovementSuspended) return;
+
+        // 근접 영웅에게 저지당하면 그 자리에서 정지(타일 저지 시스템). 풀리면 다시 전진.
+        if (!Board.IsBlocked(gameObject))
+        {
+            Vector3 target = _path[_pathIndex];
+            transform.position = Vector3.MoveTowards(transform.position, target, MoveSpeed * Time.deltaTime);
+            FaceToward(target);
+        }
+
+        // 현재 칸이 바뀐 프레임에만 보드에 보고 → 저지·커버·타겟팅이 이걸로 갱신된다.
+        Vector2Int now = Board.WorldToCell(transform.position);
+        if (now != _lastCell)
+        {
+            _lastCell = now;
+            Board.MoveEnemy(gameObject, transform.position);
+        }
+
+        // 이번 웨이포인트 도달 → 다음 목표로.
+        if ((transform.position - _path[_pathIndex]).sqrMagnitude > arriveSqr) return;
+        _pathIndex++;
+        if (_pathIndex >= _path.Count) ArriveAtCore();
+    }
+
+    private void FaceToward(Vector3 target)
+    {
+        Vector3 flat = target - transform.position;
+        flat.y = 0f;
+        if (flat.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation, Quaternion.LookRotation(flat), 12f * Time.deltaTime);
+    }
+
+    protected void ArriveAtCore()
+    {
+        _moving = false;
+        OnArrivedAtCore();
+        if (this != null && gameObject != null) Destroy(gameObject);
+    }
+
+    protected virtual void OnArrivedAtCore() { }
     private async UniTask RunSkillLoop(CancellationToken token)
     {
         if (skills == null || skills.Count == 0) return;
@@ -81,13 +231,12 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
         finally { skillRunning[index] = false; }
     }
 
-    // 기본공격 루프. AttackSpeed 를 초당 공격 횟수로 해석 (interval = 1/AttackSpeed).
     private async UniTask RunAttackLoop(CancellationToken token)
     {
         float attackTimer = 0f;
         while (!IsDie)
         {
-            float interval = AttackSpeed > 0f ? 1f / AttackSpeed : 1f;
+            float interval = AttackSpeed > 0f ? 1f / AttackSpeed : 1f; //attackspped = 초당 공격횟수
             attackTimer += Time.deltaTime;
             if (attackTimer >= interval)
             {
@@ -187,6 +336,7 @@ public abstract class EnemyBase : MonoBehaviour,IDamageAble
     {
         if(IsDie)return;
         IsDie= true;
+        _moving = false;
         //대충 죽는거
     }
 

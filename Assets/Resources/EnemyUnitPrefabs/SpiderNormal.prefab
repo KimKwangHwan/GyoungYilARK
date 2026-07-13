@@ -769,7 +769,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpiderNormal
   enemyKey: 
+  skills: []
   animator: {fileID: 479515050630319686}
+  heightOffset: 0.5
+  arriveSqr: 0.0004
   hp: 0
   speed: 0
   attack: 0

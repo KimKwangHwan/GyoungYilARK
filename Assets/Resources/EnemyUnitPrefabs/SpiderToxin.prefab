@@ -375,6 +375,8 @@ MonoBehaviour:
   enemyKey: 
   skills: []
   animator: {fileID: 2132314309153364529}
+  heightOffset: 0.5
+  arriveSqr: 0.0004
   hp: 0
   speed: 0
   attack: 0
