@@ -2,12 +2,11 @@ using UnityEngine;
 
 
 //원거리용 아군 유닛 임시용.
-public class DummyRangedAttacker : MonoBehaviour, IUnitStats
+public class DummyRangedAttacker : MonoBehaviour
 {
     [Tooltip("타일 단위 공격 범위. 원점(자기 타일)은 제외하고 주변만 훑는다.")]
     public float range = 2f;
 
-    // 맵이 커버리지/표시 사거리를 읽는 계약(실제 유닛 프리팹은 자기 스탯 컴포넌트로 구현).
     public int AttackRange => Mathf.Max(0, Mathf.RoundToInt(range));
     [Tooltip("공격 1회 데미지.")]
     public int power = 4;

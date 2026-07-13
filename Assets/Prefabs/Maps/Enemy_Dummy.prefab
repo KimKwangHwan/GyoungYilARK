@@ -1995,7 +1995,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5d78efd37543d843a970a74d48fcc04, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyUnit
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
   speed: 2
   yOffset: 0.5
   destroyOnArrive: 1

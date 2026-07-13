@@ -107,7 +107,13 @@ MonoBehaviour:
     Col: 0
     Row: 0
     Terrain: 1
-    Territory: 1
+    Territory: 0
+    EnemyLane: 0
+    CanMelee: 0
+    CanRanged: 0
+    CanBuild: 0
     Flags: 11
     Occupant: 0
   isEnemySpawn: 0
+  UnitPrefab: {fileID: 0}
+  UnitKind: 1

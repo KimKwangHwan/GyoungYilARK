@@ -7,7 +7,7 @@ using UnityEngine;
 //타일이 알아야 하는 정보는 해당 타일 위 배치된 오브젝트와 저지되는 적이다.
 //타일은 인덱스로 인해 인접한 타일로 접근할수있어야 한다.
 [DisallowMultipleComponent]
-public class Tile : MonoBehaviour
+public partial class Tile : MonoBehaviour
 {
     [Tooltip("이 타일의 논리 상태(지형·점령·용도 3축). 인스펙터 또는 베이크(Tools/Map)로 저작.")]
     public TileState State = new();
@@ -49,6 +49,10 @@ public class Tile : MonoBehaviour
     public bool IsEnemySpawn => isEnemySpawn;
     public bool IsEmpty => OccupantObject == null;
 
+ 
+    public GameObject UnitPrefab;
+    public OccupantKind UnitKind = OccupantKind.MeleeHero;
+
     /// <summary>적 통행 가능 지형인가. 고지·빈 타일은 막힘, 지상·본진은 통행(설계: 고지=이동 차단).</summary>
     public bool Walkable => State.Terrain is TerrainType.Ground or TerrainType.Core;
 
@@ -61,7 +65,7 @@ public class Tile : MonoBehaviour
         _topY = topY;
     }
 
-    //비어 있는 타일에 유닛을 배치
+    //비어 있는 타일에 유닛을 배치(런타임 인스턴스를 기록). UnitPrefab은 인스펙터 저작값이라 건드리지 않는다.
     public void SetOccupant(GameObject go, OccupantKind kind)
     {
         OccupantObject = go;

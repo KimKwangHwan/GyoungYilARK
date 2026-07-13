@@ -3,13 +3,12 @@ using UnityEngine;
 /// <summary>
 /// 테스트용 근접 공격자. MapBoard의 타일 정보만으로 현재 타일과 주변 타일 위의 적(IDamageAble)을 찾아 공격한다.
 /// </summary>
-public class DummyMeleeAttacker : MonoBehaviour, IUnitStats
+/// //임시용 코드이므로 정식으로 유닛 관련 코드가 완성시 해당 구조를 따르며, 해당 파일은 폐기 처리한다.
+public class DummyMeleeAttacker : MonoBehaviour
 {
     [Tooltip("타일 단위 공격 범위. 0이면 같은 타일의 적만 공격한다.")]
     public float range = 0f;
 
-    // 맵이 커버리지/표시 사거리를 읽는 계약(실제 유닛 프리팹은 자기 스탯 컴포넌트로 이걸 구현).
-    public int AttackRange => Mathf.Max(0, Mathf.RoundToInt(range));
     [Tooltip("공격 1회 데미지.")]
     public int power = 5;
     [Tooltip("공격 간격(초).")]

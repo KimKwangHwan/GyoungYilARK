@@ -1,22 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//적 관련 임시 코드 파일
-public class EnemyUnit : MonoBehaviour
+ 
+public class EnemyMover : MonoBehaviour
 {
     public float speed = 2f;
     public float yOffset = 0.5f;
     public bool destroyOnArrive = true;
     public MapBoard board;
 
-    //적이 이동할 경로 List에 해당 타일을 넣고 경로를 SetPath로 주면, EnemyUnit이 자동으로 이동하며 도착 시 파괴된다.
+    //적이 이동할 경로 List에 해당 타일을 넣고 경로를 SetPath로 주면, Enemy가 자동으로 이동하며 도착 시 파괴된다.
     private readonly List<Vector3> _path = new();
     private int _index;
     private bool _active;
     private Vector2Int _lastCoord = new(int.MinValue, int.MinValue); // 직전 칸(로컬 캐시) — 바뀔 때만 보드 갱신
 
     //월드 경로로 이동한다. 칸 판정은 매 프레임 현재 위치를 WorldToCell로 역산(경계 0.5 전환).
-    //pathTiles 인자는 이전 호출부 호환용(현재 미사용).
+   
     public void SetPath(IReadOnlyList<Vector3> worldPath, float moveSpeed, float surfaceOffset, IReadOnlyList<Tile> pathTiles = null)
     {
         speed = moveSpeed;

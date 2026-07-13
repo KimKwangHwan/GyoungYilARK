@@ -5,7 +5,8 @@ using UnityEngine;
 public class MapBoard : MonoBehaviour
 {
     [Header("Phase")]
-    [Tooltip("낮이면 배치 허용. 낮/밤 시스템이 붙기 전까지의 테스트용 토글(설계 §4·§6).")]
+    [Tooltip("낮이면 배치 허용. 낮/밤 시스템이 붙기 전까지의 테스트용 토글.")]
+    //정식으로 낮/밤 페이즈 시스템이 붙으면, 해당 토글은 제거.
     public bool isDayPhase = true;
 
     [Header("Territory")]
@@ -19,6 +20,8 @@ public class MapBoard : MonoBehaviour
     private readonly List<Tile> _cores = new();
     private readonly Dictionary<GameObject, Tile> _enemyCell = new(); // 적→현재 칸(직전 칸과 비교해 이동 감지)
     private readonly Dictionary<GameObject, List<Tile>> _coverByUnit = new();
+
+    
 
     private float _cellSize = 1f;
     private float _originX, _originZ; // (0,0)칸의 월드 x,z — 월드↔칸 변환 기준
@@ -34,6 +37,8 @@ public class MapBoard : MonoBehaviour
     public float CellSize => _cellSize;
     public int Cols { get; private set; } // 격자 가로 칸 수(바운딩 박스)
     public int Rows { get; private set; } // 격자 세로 칸 수
+
+    public GameObject UnitPrefab { get; set; }
 
     public event Action<Tile> Occupied;
     public event Action<Tile> Vacated;
@@ -301,6 +306,7 @@ public class MapBoard : MonoBehaviour
             Vector2Int n = c + d;
             if (InBounds(n)) result.Add(Index(n)); // 좌표로 경계 검사 → col 끝에서 옆줄로 새지 않음
         }
+
         return result;
     }
 
@@ -337,7 +343,6 @@ public class MapBoard : MonoBehaviour
         Tile tile = _cells[coord];
         if (go != null)
         {
-            go.transform.SetParent(tile.transform, true);
             go.transform.position = tile.WorldTop + Vector3.up * yOffset;
         }
         tile.SetOccupant(go, kind);
@@ -356,7 +361,7 @@ public class MapBoard : MonoBehaviour
 
     // ---- 적 격자 점유 (움직이는 적의 현재 칸 추적 — 좌표 기반) ----
     // 적은 타일 점유(OccupantObject)와 별개다: 한 칸에 여러 마리가 드나들 수 있다.
-    // 적(EnemyUnit)이 이동하며 자기 월드 위치를 알려주면, 칸이 바뀐 경우에만 이전/새 타일을 갱신한다.
+    // 적 이동 컴포넌트가 월드 위치를 알려주면, 칸이 바뀐 경우에만 이전/새 타일을 갱신한다.
 
     /// <summary>
     /// [경로 추종 적 권장] 적이 자기 "현재 타일"을 인덱스로 직접 지정한다. 월드 위치 역산 없이
@@ -402,7 +407,7 @@ public class MapBoard : MonoBehaviour
         }
     }
 
-    /// <summary>적이 사라질 때(도착·파괴) 호출. 현재 칸에서 제거한다. EnemyUnit.OnDestroy가 부른다.</summary>
+    /// <summary>적이 사라질 때 호출하여 현재 칸에서 제거한다.</summary>
     public void RemoveEnemy(GameObject enemy)
     {
         if (enemy == null || !_enemyCell.TryGetValue(enemy, out Tile tile)) return;
@@ -492,38 +497,6 @@ public class MapBoard : MonoBehaviour
         return result;
     }
 
-    public List<GameObject> GetUnits(Vector2Int origin, int range, bool square = false)
-    {
-        var list = new List<GameObject>();
-        foreach (Tile t in GetTiles(origin, range, square))
-            if (t.OccupantObject != null) list.Add(t.OccupantObject);
-        return list;
-    }
-
-    public List<IDamageAble> GetTargets(Vector3 originWorld, int range, LayerMask mask, bool square = false)
-    {
-        _ = mask; // 이전 호출부 호환용. 실제 탐색은 물리 레이어가 아니라 타일 상태만 사용한다.
-
-        var found = new HashSet<IDamageAble>();
-        Vector2Int originCell = WorldToCell(originWorld);
-
-        foreach (Tile tile in GetTiles(originCell, range, square))
-        {
-            AddTarget(tile.OccupantObject, found);
-
-            foreach (GameObject enemy in tile.Enemies)
-                AddTarget(enemy, found);
-        }
-
-        return new List<IDamageAble>(found);
-    }
-
-    private static void AddTarget(GameObject go, HashSet<IDamageAble> found)
-    {
-        if (go == null) return;
-        if (go.GetComponentInParent<IDamageAble>() is IDamageAble damageable)
-            found.Add(damageable);
-    }
 
     // ---- 헬퍼 ----
 
@@ -564,5 +537,16 @@ public class MapBoard : MonoBehaviour
             else b.Encapsulate(r.bounds);
         }
         return b;
+    }
+
+    private void GetplacedUnit(GameObject go, OccupantKind kind)
+    {
+        if (go == null) return;
+
+        if(OccupantKind.MeleeHero == kind)
+        {
+            UnitPrefab = go;
+        }
+       
     }
 }
