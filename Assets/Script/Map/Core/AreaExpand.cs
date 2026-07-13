@@ -64,7 +64,6 @@ public class AreaExpand : MonoBehaviour
         // 확장 버튼 등에서 호출. 본진 코너에서 맵 안쪽으로 L자 한 줄씩 누적 확장한다.
         // 정식 페이즈 시스템 완성 시 그쪽을 참조하도록 변경.
         if (_board == null) return false;      // 보드가 주입되지 않았으면 확장 불가.
-        if (!_board.isDayPhase) return false;  // 낮 페이즈가 아니면 확장 불가.
         if (IsMaxArea) return false;           // 최대 영역이면 확장 불가.
 
         ClaimArea(areaSize); // 현재 정사각형 한 변(areaSize) 위치에 L자 한 줄 추가.

@@ -24,7 +24,7 @@ public partial class Tile : MonoBehaviour
 
     // 내 위에 올라온 적
     private readonly List<GameObject> _enemies = new();
-    private readonly HashSet<GameObject> _covers = new();
+    private readonly HashSet<GameObject> _rangeCovers = new();
 
     //지금 이 타일 위에 있는 적들(읽기 전용). 없으면 빈 목록.
     public IReadOnlyList<GameObject> Enemies => _enemies;
@@ -36,9 +36,9 @@ public partial class Tile : MonoBehaviour
     public int FreeBlock => Mathf.Max(0, BlockCapacity - BlockedCount);
     public bool IsBlocking => BlockedCount > 0;
     public bool IsBlockFull => BlockCapacity > 0 && BlockedCount >= BlockCapacity;
-    public bool IsCovered => _covers.Count > 0;
-    public int CoverCount => _covers.Count;
-    public IReadOnlyCollection<GameObject> Covers => _covers;
+    public bool IsRangeCovered => _rangeCovers.Count > 0;
+    public int RangeCoverCount => _rangeCovers.Count;
+    public IReadOnlyCollection<GameObject> RangeCovers => _rangeCovers;
 
     public Vector2Int Coord => new(State.Col, State.Row);
     public TerrainType Terrain => State.Terrain;
@@ -99,19 +99,19 @@ public partial class Tile : MonoBehaviour
     //타일에 적 이탈 등록
     public void RemoveEnemy(GameObject enemy) => _enemies.Remove(enemy);
 
-    public void AddCover(GameObject unit)
+    public void AddRangeCover(GameObject unit)
     {
-        if (unit != null) _covers.Add(unit);
+        if (unit != null) _rangeCovers.Add(unit);
     }
 
-    public void RemoveCover(GameObject unit)
+    public void RemoveRangeCover(GameObject unit)
     {
-        if (unit != null) _covers.Remove(unit);
+        if (unit != null) _rangeCovers.Remove(unit);
     }
 
-    public void ClearCovers()
+    public void ClearRangeCovers()
     {
-        _covers.Clear();
+        _rangeCovers.Clear();
     }
 
     private static int GetCapacity(GameObject go, OccupantKind kind)

@@ -14,7 +14,7 @@ public class MapDebug : MonoBehaviour
         Place,
         Lane,
         Unit,
-        Cover
+        RangeCover
     }
 
     [SerializeField] private MapBoard board;
@@ -92,7 +92,7 @@ public class MapDebug : MonoBehaviour
             View.Place => PlaceColor(tile),
             View.Lane => tile.IsEnemyLane ? new Color(1f, 0.55f, 0.1f, 0.55f) : new Color(0.25f, 0.25f, 0.25f, 0.2f),
             View.Unit => UnitColor(tile),
-            View.Cover => tile.IsCovered ? new Color(0.45f, 0.65f, 1f, 0.55f) : new Color(0.25f, 0.25f, 0.25f, 0.2f),
+            View.RangeCover => tile.IsRangeCovered ? new Color(0.45f, 0.65f, 1f, 0.55f) : new Color(0.25f, 0.25f, 0.25f, 0.2f),
             _ => Color.white
         };
     }
@@ -157,7 +157,7 @@ public class MapDebug : MonoBehaviour
             View.Place => PlaceText(tile),
             View.Lane => tile.IsEnemyLane ? $"{tile.State.Label}\nLane" : tile.State.Label,
             View.Unit => $"U:{tile.State.Occupant}\nE:{tile.EnemyCount}\nB:{tile.BlockedCount}/{tile.BlockCapacity}",
-            View.Cover => $"Cover:{tile.CoverCount}",
+            View.RangeCover => $"RangeCover:{tile.RangeCoverCount}",
             _ => tile.State.Label
         };
     }

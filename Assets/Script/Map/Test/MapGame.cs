@@ -365,7 +365,7 @@ public class MapGame : MonoBehaviour
         if (board == null || go == null || tile == null) return;
         if (kind == OccupantKind.Building) return;
 
-        board.SetCover(go, tile.Coord, Mathf.Max(0, range));
+        board.SetRangeCover(go, tile.Coord, Mathf.Max(0, range));
     }
 
     private int UnitRange(GameObject go, OccupantKind kind)

@@ -147,7 +147,7 @@ public class PanelLogic : MonoBehaviour
                $"적 경로: {(tile.IsEnemyLane ? "포함" : "아님")}\n" +
                $"배치: {unit}\n" +
                $"적: {tile.EnemyCount}\n" +
-               $"공격범위: {(tile.IsCovered ? $"덮임({tile.CoverCount})" : "없음")}\n" +
+               $"공격범위: {(tile.IsRangeCovered ? $"덮임({tile.RangeCoverCount})" : "없음")}\n" +
                $"저지: {tile.BlockedCount}/{tile.BlockCapacity}";
     }
 
