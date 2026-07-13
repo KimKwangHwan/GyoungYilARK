@@ -31,6 +31,7 @@ public class ArcherAttackState : HeroAttackState
 
     protected override void TryExecuteCurrentStep()
     {
+        Debug.Log(runner.IsExecuting);
         if (runner.IsExecuting) return;
         runner.ExecuteNext(archer.Context, attackCts.Token).Forget();
     }

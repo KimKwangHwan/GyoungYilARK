@@ -11,8 +11,8 @@ public class RangedAttackExecutor : IAttackExecutor
     {
         string trigger = PickTrigger(data);
         ctx.anim.SetTrigger(trigger);
-        ctx.bowAnim.SetTrigger(trigger);
-        ctx.arrowAnim.SetTrigger(trigger);
+        ctx.bowAnim.SetTrigger("Attack");
+        ctx.arrowAnim.SetTrigger("Attack");
         await ctx.WaitForAnimEvent("Attack", ct);
     }
 

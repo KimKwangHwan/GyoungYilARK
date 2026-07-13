@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53722d6b3f2d2d5409d52d53ebbba3ef, type: 3}
+  m_Name: ArcherProbailitySelector
+  m_EditorClassIdentifier: Assembly-CSharp::ProbabilitySelectorSO
+  specialAttack: {fileID: 11400000, guid: 9fcc91323d886bf4cb359ad55cecfe00, type: 2}
+  chance: 0.2

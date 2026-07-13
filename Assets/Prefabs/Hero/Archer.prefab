@@ -15464,7 +15464,7 @@ Transform:
   m_Children:
   - {fileID: 1628100745165219786}
   m_Father: {fileID: 727571129801146016}
-  m_LocalEulerAnglesHint: {x: -6.2232122, y: -7.607485, z: -8.070297}
+  m_LocalEulerAnglesHint: {x: -0, y: 0, z: 10.639925}
 --- !u!1 &6442835050904335801
 GameObject:
   m_ObjectHideFlags: 0
@@ -18419,7 +18419,7 @@ Transform:
   m_Children:
   - {fileID: 3163402554336122750}
   m_Father: {fileID: 7534630325241436585}
-  m_LocalEulerAnglesHint: {x: -15.096134, y: 179.76172, z: -47.338238}
+  m_LocalEulerAnglesHint: {x: 9.128765e-15, y: -180, z: -21.918562}
 --- !u!1 &7567028240051410523
 GameObject:
   m_ObjectHideFlags: 0
@@ -19959,7 +19959,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8774439772953909245}
-  m_LocalEulerAnglesHint: {x: 72.03383, y: -177.84596, z: 177.28516}
+  m_LocalEulerAnglesHint: {x: 2.1964974, y: -168.21754, z: 169.58855}
 --- !u!1 &8144968257654767071
 GameObject:
   m_ObjectHideFlags: 0
@@ -20952,7 +20952,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5004535411788923789}
-  m_LocalEulerAnglesHint: {x: -39.430283, y: -33.88431, z: 62.514053}
+  m_LocalEulerAnglesHint: {x: -29.653555, y: 6.1860065, z: 14.75636}
 --- !u!1 &8396455889463683051
 GameObject:
   m_ObjectHideFlags: 0
@@ -22580,8 +22580,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56167c7aa72d6c94999f63ae622c6a05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Archer
-  basePattern: []
-  selectors: []
+  basePattern:
+  - {fileID: 11400000, guid: f05afca471b2b764a9d177856baf40c0, type: 2}
+  selectors:
+  - {fileID: 11400000, guid: a5568ed2f4ffdda40bb0ebf20e66c9a7, type: 2}
   procs: []
   anim: {fileID: 4378586045599540503}
   animEvents: {fileID: 7722490271011846444}
@@ -23010,4 +23012,4 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3163402554336122750}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 2.0149002}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 6.5056257}

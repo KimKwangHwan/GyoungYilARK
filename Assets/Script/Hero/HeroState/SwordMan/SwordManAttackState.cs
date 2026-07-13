@@ -31,6 +31,7 @@ public class SwordManAttackState : HeroAttackState
 
     protected override void TryExecuteCurrentStep()
     {
+        Debug.Log(runner.IsExecuting);
         if (runner.IsExecuting) return;
         runner.ExecuteNext(swordMan.Context, attackCts.Token).Forget();
     }

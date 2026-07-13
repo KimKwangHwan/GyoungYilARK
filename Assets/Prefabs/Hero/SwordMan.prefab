@@ -12973,8 +12973,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6deb4eeb61823d14e85febf5c0cf9d3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordMan
-  basePattern: []
-  selectors: []
+  basePattern:
+  - {fileID: 11400000, guid: 4a5cd321bb9469742aad69702d20f6ae, type: 2}
+  selectors:
+  - {fileID: 11400000, guid: 67731db58294ecc4388b7ed8d2bf558c, type: 2}
   procs: []
   anim: {fileID: 2363077200644652993}
   animEvents: {fileID: 6241445073555916122}
