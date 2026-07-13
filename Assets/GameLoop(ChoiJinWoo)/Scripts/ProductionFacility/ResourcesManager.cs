@@ -19,6 +19,16 @@ public class ResourcesManager : MonoBehaviour
 
     public void ProductChanged(Dictionary<ProductionType, int> products)
     {
+        Debug.Log("자원 변경");
+        if(products.Count == 0)
+        {
+            Debug.LogWarning("자원 소모 없음");
+        }
+        foreach(var prod in products)
+        {
+            Debug.Log($"{prod.Key} : {prod.Value}");
+        }
+
         if(products.ContainsKey(ProductionType.Wood))
             wood += products[ProductionType.Wood];
         if (products.ContainsKey(ProductionType.Food))

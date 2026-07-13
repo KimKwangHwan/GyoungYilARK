@@ -1052,6 +1052,7 @@ MonoBehaviour:
   EnviromentManagerPrefab: {fileID: 3058046442922278118, guid: dc7a1595742996c4299a9f573dbd0bbb, type: 3}
   GameManagerPrefab: {fileID: 2650317754315711049, guid: a872fe8395423844096d9274b9a994af, type: 3}
   FacilityManagerPrefab: {fileID: 2959566224096654579, guid: 6c07d890ad510d049ae877beb5329336, type: 3}
+  buildingPrefabRegistry: {fileID: 11400000, guid: 1d3447ef54d848e4fb3e5b5ecb9a6b87, type: 2}
   UiManagerParent: {fileID: 2102995689}
   sunLight: {fileID: 1954883597}
 --- !u!4 &568241822

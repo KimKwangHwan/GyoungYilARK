@@ -8,11 +8,14 @@ public class FacilityManager : MonoBehaviour
     private Dictionary<ProductionType, int> products = new();
 
     private ResourcesManager resourcesManager;
+    private BuildingPool objectPool;
 
     [Inject]
-    private void Construct(ResourcesManager resourcesManager)
+    private void Construct(ResourcesManager resourcesManager, BuildingPool objectPool)
     {
         this.resourcesManager = resourcesManager;
+        this.objectPool = objectPool;
+
     }
 
     public void AddFacility(ProductionFacility facility)

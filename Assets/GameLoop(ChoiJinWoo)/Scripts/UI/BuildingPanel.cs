@@ -6,12 +6,6 @@ public class BuildingPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI workerText;
     private ProductionFacility facility;
 
-    private void OnDisable()
-    {
-        facility.OnWorkerChanged -= UpdateWorkerText;
-        facility = null;
-    }
-
     public void OnMinusButton()
     {
         if(facility != null)
@@ -38,5 +32,13 @@ public class BuildingPanel : MonoBehaviour
         this.facility = facility;
         facility.OnWorkerChanged += UpdateWorkerText;
         facility.UpdateWorker();
+    }
+
+    public void OnRelease()
+    {
+        facility.Release();
+        facility.OnWorkerChanged -= UpdateWorkerText;
+        facility = null;
+        gameObject.SetActive(false);
     }
 }

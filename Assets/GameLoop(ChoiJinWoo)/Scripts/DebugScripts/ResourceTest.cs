@@ -14,23 +14,38 @@ public class ResourceTest : MonoBehaviour
     private ResourcesManager manager;
     private UiManager uiManager;
     private GameManager gameManager;
+    private BuildingPool buildingPool;
+    private Dictionary<ProductionType, ProductionFacility> _prefabs;
+    [SerializeField] private MapBoard board;
     private IObjectResolver resolver;
 
     [Inject]
-    private void Construct(IObjectResolver resolver, ResourcesManager resourcesManager, UiManager uiManager, GameManager gameManager)
+    private void Construct(IObjectResolver resolver, ResourcesManager resourcesManager, UiManager uiManager, GameManager gameManager, BuildingPool buildingPool, BuildingPrefabRegistry registry)
     {
         this.resolver = resolver;
         manager = resourcesManager;
         this.uiManager = uiManager;
         this.gameManager = gameManager;
+        this.buildingPool = buildingPool;
+        _prefabs = registry.Prefabs;
     }
+
+    //private void Start()
+    //{
+    //    board.Occupied += buildingPool.TryRent;
+    //}
+
+    //private void OnDestroy()
+    //{
+    //    board.Occupied -= buildingPool.TryRent;
+    //}
 
     private void Update()
     {
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
-            if (manager.CheckResources(facilityPrefabs[0].BasicValue.ConstructProduct) && gameManager.CanBuild)
-                obj.Add(resolver.Instantiate(facilityPrefabs[0]));
+            if (manager.CheckResources(_prefabs[ProductionType.Wood].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(buildingPool.Rent(ProductionType.Wood));
             else
             {
                 if(gameManager.CanBuild)
@@ -42,8 +57,8 @@ public class ResourceTest : MonoBehaviour
 
         if (Keyboard.current.digit2Key.wasPressedThisFrame)
         {
-            if (manager.CheckResources(facilityPrefabs[1].BasicValue.ConstructProduct) && gameManager.CanBuild)
-                obj.Add(resolver.Instantiate(facilityPrefabs[1]));
+            if (manager.CheckResources(_prefabs[ProductionType.Food].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(buildingPool.Rent(ProductionType.Food));
             else
             {
                 if (gameManager.CanBuild)
@@ -55,8 +70,8 @@ public class ResourceTest : MonoBehaviour
 
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
-            if (manager.CheckResources(facilityPrefabs[2].BasicValue.ConstructProduct) && gameManager.CanBuild)
-                obj.Add(resolver.Instantiate(facilityPrefabs[2]));
+            if (manager.CheckResources(_prefabs[ProductionType.Gold].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(buildingPool.Rent(ProductionType.Gold));
             else
             {
                 if (gameManager.CanBuild)
@@ -68,8 +83,8 @@ public class ResourceTest : MonoBehaviour
 
         if (Keyboard.current.digit4Key.wasPressedThisFrame)
         {
-            if (manager.CheckResources(facilityPrefabs[3].BasicValue.ConstructProduct) && gameManager.CanBuild)
-                obj.Add(resolver.Instantiate(facilityPrefabs[3]));
+            if (manager.CheckResources(_prefabs[ProductionType.Iron].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(buildingPool.Rent(ProductionType.Iron));
             else
             {
                 if (gameManager.CanBuild)
@@ -81,8 +96,8 @@ public class ResourceTest : MonoBehaviour
 
         if (Keyboard.current.digit5Key.wasPressedThisFrame)
         {
-            if (manager.CheckResources(facilityPrefabs[4].BasicValue.ConstructProduct) && gameManager.CanBuild)
-                obj.Add(resolver.Instantiate(facilityPrefabs[4]));
+            if (manager.CheckResources(_prefabs[ProductionType.Stone].BasicValue.ConstructProduct) && gameManager.CanBuild)
+                obj.Add(buildingPool.Rent(ProductionType.Stone));
             else
             {
                 if (gameManager.CanBuild)

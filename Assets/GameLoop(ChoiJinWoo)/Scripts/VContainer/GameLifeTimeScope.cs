@@ -10,6 +10,7 @@ public class GameLifeTimeScope : LifetimeScope
     [SerializeField] private EnviromentManager EnviromentManagerPrefab;
     [SerializeField] private GameManager GameManagerPrefab;
     [SerializeField] private FacilityManager FacilityManagerPrefab;
+    [SerializeField] private BuildingPrefabRegistry buildingPrefabRegistry;
     [SerializeField] private Canvas UiManagerParent;
     [SerializeField] private Light sunLight;
 
@@ -21,6 +22,8 @@ public class GameLifeTimeScope : LifetimeScope
         builder.RegisterComponentInNewPrefab(EnviromentManagerPrefab, Lifetime.Singleton).AsSelf();
         builder.RegisterComponentInNewPrefab(GameManagerPrefab, Lifetime.Singleton).AsSelf();
         builder.RegisterComponentInNewPrefab(FacilityManagerPrefab, Lifetime.Singleton).AsSelf();
+        builder.RegisterInstance(buildingPrefabRegistry);
+        builder.Register<BuildingPool>(Lifetime.Singleton);
 
         // 생성된 인스턴스에 씬의 sunLight를 넘겨주는 콜백
         builder.RegisterBuildCallback(resolver =>
