@@ -12957,6 +12957,7 @@ MonoBehaviour:
   anim: {fileID: 2363077200644652993}
   animEvents: {fileID: 6241445073555916122}
   attackSpeed: 1
+  statData: {fileID: 11400000, guid: 7b41ee83b1ea5574f8002684d4e2c81f, type: 2}
   board: {fileID: 0}
 --- !u!1 &5299033108214222058
 GameObject:

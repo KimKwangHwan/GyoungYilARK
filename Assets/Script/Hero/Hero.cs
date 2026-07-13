@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,12 +15,6 @@ public class Hero : MonoBehaviour, IDamageAble
 
     public void AddSelector(AttackSelectorSO sel) => selectors.Add(sel);
     public void AddProc(AttackProcSO proc) => procs.Add(proc);
-
-    public float Hp => throw new System.NotImplementedException();
-    public int Defense => throw new System.NotImplementedException();
-
-    public void Die() => throw new System.NotImplementedException();
-    public void TakeDamage(int damage) => throw new System.NotImplementedException();
 
     protected AttackContext context;
     public AttackContext Context => context;
@@ -39,6 +34,7 @@ public class Hero : MonoBehaviour, IDamageAble
     public GameObject Target => target;
 
     [SerializeField] private float attackSpeed;
+    [SerializeField] private StatDataSO statData;
     public float AttackSpeed => attackSpeed;
 
     [SerializeField] private MapBoard board;
@@ -48,12 +44,30 @@ public class Hero : MonoBehaviour, IDamageAble
     public Tile CurrentTile => currentTile;
     //private List<Tile> attackRangedTiles;
     protected int range = 1;
+
+    private StatContainer sc;
+    public StatContainer SC => sc;
+
+    private int currentBlockCount = 0;
+    private bool canBlocking = true;
+    public bool CanBlocking => canBlocking;
+    public float Hp => throw new System.NotImplementedException();
+    public int Defense => throw new System.NotImplementedException();
+
+    public void Die() => throw new System.NotImplementedException();
+    public void TakeDamage(int damage) => throw new System.NotImplementedException();
+    
     protected virtual void Awake()
     {
         stateMachine = new HeroStateMachine();
         idleState = new HeroIdleState(this, stateMachine);
         stateMachine.Initialize(idleState);
         //attackRangedTiles = board.GetTiles(origin, range);
+        sc.AddStat(StatType.HP, statData.maxHp);
+        sc.AddStat(StatType.ATK, statData.attackPower);
+        sc.AddStat(StatType.DEF, statData.defence);
+        sc.AddStat(StatType.BLK, statData.blockCount);
+        sc.AddStat(StatType.AS, statData.attackSpeed);
     }
 
     protected virtual void Start()
@@ -103,5 +117,10 @@ public class Hero : MonoBehaviour, IDamageAble
         }
         target = null;
         context.target = null;
+    }
+
+    public void UpdateBlock()
+    {
+
     }
 }
