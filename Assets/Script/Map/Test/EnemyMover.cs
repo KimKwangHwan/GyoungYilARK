@@ -8,7 +8,7 @@ public class EnemyMover : MonoBehaviour
     public float yOffset = 0.5f;
     public bool destroyOnArrive = true;
     public MapBoard board;
-
+    //Enemy측 이동 경로 방식에 따라 해당 파일은 대체 될수 있음.
     //적이 이동할 경로 List에 해당 타일을 넣고 경로를 SetPath로 주면, Enemy가 자동으로 이동하며 도착 시 파괴된다.
     private readonly List<Vector3> _path = new();
     private int _index;
