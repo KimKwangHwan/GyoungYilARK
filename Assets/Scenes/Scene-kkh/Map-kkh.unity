@@ -19055,6 +19055,14 @@ PrefabInstance:
       propertyPath: board
       value: 
       objectReference: {fileID: 314587624}
+    - target: {fileID: 364525912173520321, guid: c30b2462f1d175a40be298650efb1f87, type: 3}
+      propertyPath: selectors.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 364525912173520321, guid: c30b2462f1d175a40be298650efb1f87, type: 3}
+      propertyPath: 'selectors.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 67731db58294ecc4388b7ed8d2bf558c, type: 2}
     - target: {fileID: 2363077200644652993, guid: c30b2462f1d175a40be298650efb1f87, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
