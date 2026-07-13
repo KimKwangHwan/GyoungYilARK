@@ -300,7 +300,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1067044161464931302}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 1.8853357}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 4.320054}
 --- !u!1 &174201753457280156
 GameObject:
   m_ObjectHideFlags: 0
@@ -422,7 +422,7 @@ Transform:
   m_Children:
   - {fileID: 3696936208431306952}
   m_Father: {fileID: 1069270554616507302}
-  m_LocalEulerAnglesHint: {x: -2.0766397, y: -9.936056, z: -9.234289}
+  m_LocalEulerAnglesHint: {x: -0.4459768, y: 4.158876, z: 6.643381}
 --- !u!1 &226647406663893655
 GameObject:
   m_ObjectHideFlags: 0
@@ -1838,7 +1838,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1878988852048503292}
-  m_LocalEulerAnglesHint: {x: -2.196497, y: 11.782451, z: 16.870079}
+  m_LocalEulerAnglesHint: {x: -8.471744, y: 35.57531, z: -18.447638}
 --- !u!1 &717488323279167565
 GameObject:
   m_ObjectHideFlags: 0
@@ -4497,7 +4497,7 @@ Transform:
   m_Children:
   - {fileID: 1067044161464931302}
   m_Father: {fileID: 1170920277328994724}
-  m_LocalEulerAnglesHint: {x: -10.71731, y: 171.66507, z: -48.12203}
+  m_LocalEulerAnglesHint: {x: 3.1651034, y: -175.24417, z: -33.475826}
 --- !u!1 &1623595540545148153
 GameObject:
   m_ObjectHideFlags: 0
@@ -7274,7 +7274,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6745345122198000057}
-  m_LocalEulerAnglesHint: {x: 2.196506, y: -168.21754, z: 164.21251}
+  m_LocalEulerAnglesHint: {x: 33.86673, y: 163.50703, z: 156.26953}
 --- !u!1 &3115289880047990019
 GameObject:
   m_ObjectHideFlags: 0
@@ -12913,7 +12913,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5007865040228602982}
-  - component: {fileID: 7856665746529333507}
   - component: {fileID: 364525912173520321}
   m_Layer: 0
   m_Name: SwordMan
@@ -12938,29 +12937,6 @@ Transform:
   - {fileID: 5546029231603317057}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &7856665746529333507
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5228687494590014126}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 1.46
-  m_Height: 1.6
-  m_Direction: 1
-  m_Center: {x: 0, y: -0.21, z: 0}
 --- !u!114 &364525912173520321
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12981,6 +12957,7 @@ MonoBehaviour:
   anim: {fileID: 2363077200644652993}
   animEvents: {fileID: 6241445073555916122}
   attackSpeed: 1
+  board: {fileID: 0}
 --- !u!1 &5299033108214222058
 GameObject:
   m_ObjectHideFlags: 0

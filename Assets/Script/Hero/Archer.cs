@@ -20,5 +20,6 @@ public class Archer : Hero
             arrowAnim = ArrowAnim,
             animEvents = AnimEvents
         };
+        range = 5;
     }
 }

@@ -15,12 +15,14 @@ public class SwordManAttackState : HeroAttackState
     public override void Enter()
     {
         base.Enter();
-        runner = new HeroAttackRunner(swordMan.BasePattern, swordMan.Selectors, swordMan.Procs, new MeleeAttackExecutor());
+        runner ??= new HeroAttackRunner(swordMan.BasePattern, swordMan.Selectors, swordMan.Procs, new MeleeAttackExecutor());
+        TryExecuteCurrentStep();
     }
 
     public override void Update()
     {
         base.Update();
+        if (stateMachine.CurrentState != this) return;
         timer += Time.deltaTime;
         if (timer >= swordMan.AttackSpeed)
         {
@@ -31,7 +33,6 @@ public class SwordManAttackState : HeroAttackState
 
     protected override void TryExecuteCurrentStep()
     {
-        Debug.Log(runner.IsExecuting);
         if (runner.IsExecuting) return;
         runner.ExecuteNext(swordMan.Context, attackCts.Token).Forget();
     }

@@ -41,33 +41,67 @@ public class Hero : MonoBehaviour, IDamageAble
     [SerializeField] private float attackSpeed;
     public float AttackSpeed => attackSpeed;
 
+    [SerializeField] private MapBoard board;
+    public MapBoard Board => board;
+    private Vector2Int origin;
+    private Tile currentTile;
+    public Tile CurrentTile => currentTile;
+    //private List<Tile> attackRangedTiles;
+    protected int range = 1;
     protected virtual void Awake()
     {
         stateMachine = new HeroStateMachine();
         idleState = new HeroIdleState(this, stateMachine);
         stateMachine.Initialize(idleState);
+        //attackRangedTiles = board.GetTiles(origin, range);
+    }
+
+    protected virtual void Start()
+    {
+        origin = board.WorldToCell(transform.position);
+        if (board.TryGetCell(origin, out Tile current))
+            currentTile = current;
+        currentTile.SetOccupant(this.gameObject, OccupantKind.MeleeHero);
     }
 
     protected virtual void Update()
     {
         stateMachine.CurrentState.Update();
+        if (target != null)
+            CheckTargetStillInRange();
+        if (target == null)
+            AcquireTargetFromTiles();
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void AcquireTargetFromTiles()
     {
-        if (other.tag == "Enemy")
+        foreach (Tile tile in board.GetTiles(origin, range, false))
         {
-            target = other.gameObject;
-            context.target = target.transform;
+            foreach (GameObject enemy in tile.Enemies)
+            {
+                if (enemy == null) continue;
+                if (enemy.tag == "Enemy")
+                {
+                    //if (enemy.GetComponentInParent<IDamageAble>() is not IDamageAble damageable) continue;
+                    target = enemy;
+                    context.target = target.transform;
+                    return;
+                }
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void CheckTargetStillInRange()
     {
-        if (target == other.gameObject)
+        foreach (Tile tile in board.GetTiles(origin, range, false))
         {
-            target = null;
-            context.target = null;
+            foreach (GameObject enemy in tile.Enemies)
+            {
+                if (enemy == target)
+                    return;
+            }
         }
+        target = null;
+        context.target = null;
     }
 }

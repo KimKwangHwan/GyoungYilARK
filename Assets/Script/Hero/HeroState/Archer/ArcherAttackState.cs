@@ -16,11 +16,13 @@ public class ArcherAttackState : HeroAttackState
     {
         base.Enter();
         runner = new HeroAttackRunner(archer.BasePattern, archer.Selectors, archer.Procs, new RangedAttackExecutor());
+        TryExecuteCurrentStep();
     }
 
     public override void Update()
     {
         base.Update();
+        if (stateMachine.CurrentState != this) return;
         timer += Time.deltaTime;
         if (timer >= archer.AttackSpeed)
         {
@@ -31,7 +33,6 @@ public class ArcherAttackState : HeroAttackState
 
     protected override void TryExecuteCurrentStep()
     {
-        Debug.Log(runner.IsExecuting);
         if (runner.IsExecuting) return;
         runner.ExecuteNext(archer.Context, attackCts.Token).Forget();
     }

@@ -22520,7 +22520,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8960899001449437281}
-  - component: {fileID: 9166581507996402050}
   - component: {fileID: 4332685919364535766}
   m_Layer: 0
   m_Name: Archer
@@ -22545,29 +22544,6 @@ Transform:
   - {fileID: 7050407729799122033}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &9166581507996402050
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9004755700449656008}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 6.33
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4332685919364535766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22588,6 +22564,7 @@ MonoBehaviour:
   anim: {fileID: 4378586045599540503}
   animEvents: {fileID: 7722490271011846444}
   attackSpeed: 1.5
+  board: {fileID: 0}
   bowAnim: {fileID: 5443066929859240409}
   arrowAnim: {fileID: 8610688408873876571}
 --- !u!1 &9019854544271929726
