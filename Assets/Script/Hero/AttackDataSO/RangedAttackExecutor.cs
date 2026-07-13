@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class RangedAttackExecutor : IAttackExecutor
 {
@@ -14,6 +15,11 @@ public class RangedAttackExecutor : IAttackExecutor
         ctx.bowAnim.SetTrigger("Attack");
         ctx.arrowAnim.SetTrigger("Attack");
         await ctx.WaitForAnimEvent("Attack", ct);
+
+        IObjectPool<Projectile> pool = ctx.getProjectilePool(data.projectilePrefab);
+        Projectile arrow = pool.Get();
+        arrow.transform.SetPositionAndRotation(ctx.muzzle.position, ctx.muzzle.rotation);
+        arrow.Launch(ctx.target, data.attackDamage, pool);
     }
 
     private string PickTrigger(AttackDataSO data)

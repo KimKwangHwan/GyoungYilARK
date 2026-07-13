@@ -58,7 +58,7 @@ public class HeroAttackRunner
         if (depth >= MaxProcDepth) return;
 
         await executor.Execute(attack, ctx, ct);
-
+        
         foreach (var proc in procs)
         {
             if (depth > 0 && !proc.allowRecursiveProc) continue;

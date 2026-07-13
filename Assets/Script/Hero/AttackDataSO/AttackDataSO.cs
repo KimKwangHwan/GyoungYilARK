@@ -11,6 +11,8 @@ public class AttackDataSO : ScriptableObject
 
     public string[] animTriggers = { "Attack" };
     public AnimSelectMode selectMode = AnimSelectMode.Sequential;
+
+    public Projectile projectilePrefab;
 }
 
 public enum AttackType
