@@ -17,8 +17,6 @@ public class PathTrail : MonoBehaviour
     private PathTrailCalc calc; //이번 라운드에 그릴 경로 데이터 계산 담당.
     private TrailRunBuilder builder; //경로 점을 트레일 오브젝트로 만들고 없애는 담당.
     private TrailPlaybackState playback; //반복/대기/1회 재생 상태와 이동 담당.
-    private bool isRefreshPending; //재생 요청이 대기 중인지 여부. 재생 중이면 무시.
-    private int requestVersion; //대기 중이던 낮 예약이 그 사이 다른 재생 요청에 밀렸는지 판단하는 순번표
 
     // 필요한 컴포넌트 참조와 협력 클래스를 초기화한다.
     private void Awake()
@@ -39,14 +37,8 @@ public class PathTrail : MonoBehaviour
     // 포털 갱신 다음 프레임에 최신 활성 경로를 반복 재생한다.
     public async void PlayLoop()
     {
-        if (isRefreshPending) return;
-
-        isRefreshPending = true;
-        int myVersion = ++requestVersion;
         bool isCanceled = await UniTask.NextFrame(this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow();
-        isRefreshPending = false;
         if (isCanceled || !isActiveAndEnabled) return;
-        if (myVersion != requestVersion) return; //기다리는 동안 다른 재생 요청이 새로 들어왔으면 덮어쓰지 않는다
 
         LoadPoints();
         playback.Begin(loop: true);
@@ -55,7 +47,6 @@ public class PathTrail : MonoBehaviour
     // 모든 활성 경로를 한 번 재생한다.
     public void PlayOnce()
     {
-        requestVersion++; //대기 중이던 낮 예약을 무효화한다
         LoadPoints();
         playback.Begin(loop: false);
     }
@@ -63,7 +54,6 @@ public class PathTrail : MonoBehaviour
     // 모든 Trail의 재생과 대기 상태를 정지한다.
     public void StopTrail()
     {
-        requestVersion++; //대기 중이던 낮 예약을 무효화한다
         playback.Stop();
     }
 

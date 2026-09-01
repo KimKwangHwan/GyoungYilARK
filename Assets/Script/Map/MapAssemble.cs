@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using VContainer;
 
 // 담당들을 만들어 MapCommand와 MapView에 넣어준다. 조립만 하고 게임 로직은 갖지 않는다.
 // Start에서 하는 이유: MapGame의 [Inject] Construct가 Awake 단계에 끝나므로 그 뒤라야 Placer가 채워져 있다.
@@ -30,9 +31,8 @@ public class MapAssemble : MonoBehaviour
     [SerializeField] private PlayerSkillPanel playerSkillPanel;
     [SerializeField] private GimmickPopup gimmickPopup;
 
-    private List<PathTrail> pathTrails;
     private List<EnemyLanes> laneModules;
-    private TrailNightController trailNight;
+    private TrailStateController trailState;
     private PlaceGhost ghost;
     private HeroSkillCastController skillCast;
     private PlayerSkillCastController playerSkillCast;
@@ -45,12 +45,16 @@ public class MapAssemble : MonoBehaviour
     // 아직 null이라 OnDestroy가 터진다. 이 플래그로 Start 완료 여부를 확인하고 조기 종료한다.
     private bool started;
 
+    [Inject]
+    private void Construct(TrailStateController trailState)
+    {
+        this.trailState = trailState;
+    }
+
     private void Start()
     {
-        trailNight = new TrailNightController(mapGame.DayNightData);
-
         List<MapBoard> boards;
-        CollectModuleComponents(out boards, out pathTrails, out laneModules);
+        CollectModuleComponents(out boards, out laneModules);
         BuildCampfires(boards);
 
         palette.Bind(mapGame.HeroRoster);
@@ -156,13 +160,10 @@ public class MapAssemble : MonoBehaviour
             { PlaceMode.Place, action.PlaceUnit },
             { PlaceMode.Remove, action.RemoveUnit },
         };
-        foreach(PathTrail trail in pathTrails)
-        {
-            mapGame.EnviromentManager.OnDay += trail.PlayLoop;
-            mapGame.EnviromentManager.OnNight += trail.PlayOnce;
-        }
-
-        mapGame.Rule.ChangeToNight += trailNight.StopAll;
+        mapGame.Rule.ChangeToDay += trailState.StartDay;
+        mapGame.Rule.ChangeToNight += trailState.StartNight;
+        mapGame.EnviromentManager.OnDay += trailState.FinishDay;
+        mapGame.EnviromentManager.OnNight += trailState.FinishNight;
 
         mapGame.Rule.ChangeToDay += OnDayChanged;
         OnDayChanged(); // 첫 날짜도 시작하자마자 바로 맞춘다 — 이벤트가 처음 울릴 때까지 기다리지 않는다
@@ -236,17 +237,11 @@ public class MapAssemble : MonoBehaviour
         {
             mapGame.Rule.ChangeToNight -= expand.CancelChoices;
         }
-        if (pathTrails != null)
-        {
-            foreach (PathTrail trail in pathTrails)
-            {
-                mapGame.EnviromentManager.OnDay -= trail.PlayLoop;
-                mapGame.EnviromentManager.OnNight -= trail.PlayOnce;
-            }
-
-            mapGame.Rule.ChangeToNight -= trailNight.StopAll;
-            trailNight.Release();
-        }
+        mapGame.Rule.ChangeToDay -= trailState.StartDay;
+        mapGame.Rule.ChangeToNight -= trailState.StartNight;
+        mapGame.EnviromentManager.OnDay -= trailState.FinishDay;
+        mapGame.EnviromentManager.OnNight -= trailState.FinishNight;
+        trailState.Release();
     }
 
     // 사막이 세이브 복원이나 확장으로 뒤늦게 열리면 놓친 낮 준비를 다시 맞춘다.
@@ -284,11 +279,9 @@ public class MapAssemble : MonoBehaviour
     // 레지스트리에 등록된 모듈들의 보드·트레일·레인 목록을 한 번의 순회로 모은다. 모듈 루트에 ModuleLogic과 MapBoard가 함께 산다.
     private void CollectModuleComponents(
         out List<MapBoard> boards,
-        out List<PathTrail> trails,
         out List<EnemyLanes> lanes)
     {
         boards = new List<MapBoard>();
-        trails = new List<PathTrail>();
         lanes = new List<EnemyLanes>();
 
         foreach (ModuleLogic logic in registry.AllModules.Values)
@@ -298,8 +291,7 @@ public class MapAssemble : MonoBehaviour
             PathTrail trail = logic.GetComponent<PathTrail>();
             if (trail != null)
             {
-                trails.Add(trail);
-                trailNight.Collect(logic, trail);
+                trailState.Collect(logic, trail);
             }
 
             EnemyLanes lane = logic.GetComponent<EnemyLanes>();
