@@ -14,6 +14,7 @@ public class TrailStateController
     }
 
     private readonly List<PathTrail> trails = new();
+    private readonly List<PathTrail> preparingTrails = new();
     private readonly List<ModuleLogic> modules = new();
     private readonly List<Action<ModuleState>> handlers = new();
     private TrailState currentState = TrailState.LoadPending;
@@ -67,7 +68,10 @@ public class TrailStateController
     // 모듈이 준비 상태가 된 순간 현재 완료된 낮·밤에 맞는 재생 명령을 보낸다.
     private void HandleModuleState(PathTrail trail, ModuleState moduleState)
     {
+        preparingTrails.Remove(trail);
         if (moduleState != ModuleState.Preparing) return;
+
+        preparingTrails.Add(trail);
 
         switch (currentState)
         {
@@ -83,24 +87,18 @@ public class TrailStateController
     // 준비된 모든 Trail을 반복 재생한다.
     private void PlayLoops()
     {
-        for (int index = 0; index < trails.Count; index++)
+        for (int index = 0; index < preparingTrails.Count; index++)
         {
-            if (modules[index].CurrentState == ModuleState.Preparing)
-            {
-                trails[index].PlayLoop();
-            }
+            preparingTrails[index].PlayLoop();
         }
     }
 
     // 준비된 모든 Trail을 한 번 재생한다.
     private void PlayOnce()
     {
-        for (int index = 0; index < trails.Count; index++)
+        for (int index = 0; index < preparingTrails.Count; index++)
         {
-            if (modules[index].CurrentState == ModuleState.Preparing)
-            {
-                trails[index].PlayOnce();
-            }
+            preparingTrails[index].PlayOnce();
         }
     }
 
