@@ -37,9 +37,7 @@ public class MapAssemble : MonoBehaviour
     private HeroSkillCastController skillCast;
     private PlayerSkillCastController playerSkillCast;
     private DesertZoneEffect desertZoneEffect;
-    private List<IceZoneEffect> iceZoneEffects;
-    private List<IceSnowfall> iceSnowfalls;
-    private CampfireLightController campfireLights;
+    private IceNightBuilder iceNight;
     private MapBoard desertBoard;
     // 씬 로딩 중 게임을 끄면 Start가 끝나기 전에 OnDestroy가 불릴 수 있어, 이때 아래 필드들이
     // 아직 null이라 OnDestroy가 터진다. 이 플래그로 Start 완료 여부를 확인하고 조기 종료한다.
@@ -55,7 +53,7 @@ public class MapAssemble : MonoBehaviour
     {
         List<MapBoard> boards;
         CollectModuleComponents(out boards, out laneModules);
-        BuildCampfires(boards);
+        iceNight = new IceNightBuilder(boards, mapGame.Units);
 
         palette.Bind(mapGame.HeroRoster);
 
@@ -171,10 +169,9 @@ public class MapAssemble : MonoBehaviour
         desertBoard.Module.OnStateChanged += RefreshDesertDay;
 
         RegisterZoneEffect(desertZoneEffect);
-        RegisterZoneEffect(campfireLights);
-        for (int index = 0; index < iceZoneEffects.Count; index++)
+        for (int index = 0; index < iceNight.Effects.Count; index++)
         {
-            RegisterZoneEffect(iceZoneEffects[index]);
+            RegisterZoneEffect(iceNight.Effects[index]);
         }
 
         mapGame.Rule.ChangeToDay += OnFireDayChanged;
@@ -208,16 +205,9 @@ public class MapAssemble : MonoBehaviour
         desertBoard.Module.OnStateChanged -= RefreshDesertDay;
         UnregisterZoneEffect(desertZoneEffect);
         desertZoneEffect.Dispose();
-        if (campfireLights != null)
+        for (int index = 0; index < iceNight.Effects.Count; index++)
         {
-            UnregisterZoneEffect(campfireLights);
-        }
-        if (iceZoneEffects != null)
-        {
-            for (int index = 0; index < iceZoneEffects.Count; index++)
-            {
-                UnregisterZoneEffect(iceZoneEffects[index]);
-            }
+            UnregisterZoneEffect(iceNight.Effects[index]);
         }
         mapGame.Rule.ChangeToDay -= OnFireDayChanged;
         mapGame.Rule.ChangeToNight -= OnFireNightChanged;
@@ -298,30 +288,6 @@ public class MapAssemble : MonoBehaviour
             if (lane != null)
             {
                 lanes.Add(lane);
-            }
-        }
-    }
-
-    // 모든 얼음 보드의 고정 모닥불 보호 영역과 그 자리에 놓인 불빛, 지대 효과를 시작할 때 한 번 만듭니다.
-    private void BuildCampfires(List<MapBoard> boards)
-    {
-        CampfireCalc calc = new();
-        campfireLights = new CampfireLightController();
-        iceZoneEffects = new List<IceZoneEffect>();
-        iceSnowfalls = new List<IceSnowfall>();
-        GameObject snowPrefab = Resources.Load<GameObject>("ZoneEffectPrefab/IceSnowfallVFX");
-        for (int index = 0; index < boards.Count; index++)
-        {
-            MapBoard board = boards[index];
-            IceZone iceZone = board.GetComponent<IceZone>();
-            if (iceZone != null)
-            {
-                CampfireData data = calc.BuildData(board.Cells, iceZone.CampfireRange);
-                iceZone.SetCampfire(data);
-                campfireLights.Collect(board, iceZone.CampfireRange);
-                iceZoneEffects.Add(new IceZoneEffect(board, mapGame.Units, iceZone));
-                SnowMeltZone meltZone = new SnowMeltZone(board, iceZone.CampfireRange);
-                iceSnowfalls.Add(new IceSnowfall(board, snowPrefab, meltZone.Zones));
             }
         }
     }

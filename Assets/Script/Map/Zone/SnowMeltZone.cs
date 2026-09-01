@@ -11,28 +11,15 @@ public class SnowMeltZone
 
     public IReadOnlyList<Collider> Zones => zones;
 
-    // 이 얼음 보드의 모닥불 자리마다 보호 반경만 한 구역을 만들어 담는다.
-    public SnowMeltZone(MapBoard iceBoard, int campfireRange)
+    // 넘겨받은 모닥불 불빛 자리마다 보호 반경만 한 구역을 만들어 담는다.
+    public SnowMeltZone(MapBoard iceBoard, int campfireRange, CampfireLight[] lightGroup)
     {
-        Transform holder = ReadHolder(iceBoard);
-        CampfireLight[] fires = holder.GetComponentsInChildren<CampfireLight>(true);
         float meltRadius = campfireRange * iceBoard.CellSize;
 
-        for (int index = 0; index < fires.Length; index++)
+        for (int index = 0; index < lightGroup.Length; index++)
         {
-            zones.Add(BuildZone(fires[index].transform.position, meltRadius, iceBoard.transform));
+            zones.Add(BuildZone(lightGroup[index].transform.position, meltRadius, iceBoard.transform));
         }
-    }
-
-    // 모닥불 불빛이 매달린 상위 자리를 돌려준다.
-    private static Transform ReadHolder(MapBoard iceBoard)
-    {
-        if (iceBoard.transform.parent == null)
-        {
-            return iceBoard.transform;
-        }
-
-        return iceBoard.transform.parent;
     }
 
     // 지정 위치에 눈송이만 반응하는 구 모양 구역 하나를 만든다.
