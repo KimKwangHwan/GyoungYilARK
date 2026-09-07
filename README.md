@@ -70,7 +70,6 @@ graph LR
     D2 --> E
     E -->|근접| E1[MeleeAttackExecutor]
     E -->|원거리| E2[RangedAttackExecutor]
-    E -->|힐| E3[HealAttackExecutor]
     RUN -.훅.-> T[HeroTrait × N<br/>컴포넌트 조합]
 ```
 
