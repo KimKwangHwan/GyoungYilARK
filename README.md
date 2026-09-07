@@ -69,6 +69,20 @@
 - 영웅이 공격할 때, 트레잇 컴포넌트를 참조하여 함수 실행
 코드 변경 없이 만들어진 AttackData 에셋 51개
 
+
+```mermaid
+graph LR
+    ASO[AttackDataSO<br/>데이터 1개 = 공격 1종] --> RUN[HeroAttackRunner]
+    RUN -->|timingMode| D{delivery}
+    D -->|Discrete| D1[DiscreteAttackStrategy]
+    D -->|Continuous| D2[ContinuousBeamStrategy]
+    D1 --> E{executor}
+    D2 --> E
+    E -->|근접| E1[MeleeAttackExecutor]
+    E -->|원거리| E2[RangedAttackExecutor]
+    RUN -.훅.-> T[HeroTrait × N<br/>컴포넌트 조합]
+```
+
 ### 2. 영웅 스탯, 업그레이드 파이프라인 - 레이어 분리로 가산 그룹 오염 방지
 
 **스탯 변화**
@@ -146,6 +160,7 @@ graph TD
 
     style 영웅 fill:#1f6feb22,stroke:#1f6feb
 ```
+
 ---
 
 ## 기술 스택
