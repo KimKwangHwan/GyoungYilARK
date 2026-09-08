@@ -128,6 +128,93 @@ graph LR
 
 ---
 
+## 게임 시스템
+
+타일맵 · 적 웨이브 · 낮/밤 자원 사이클 · 맵 에디터 — 협업 파트의 핵심 설계.
+
+### 1. 타일맵 · 그리드
+
+**콜라이더 없는 좌표계**
+- `Grid` 하나가 좌표계의 단일 소스. 타일은 논리 좌표(`State.Col/Row`)를 직접 들고, 월드 위치는 에디터에서 `TilePosBaker`가 새긴다
+- 맵 조각(모듈)마다 좌표가 0-base라 `_bakedOffset`으로 raw Grid 좌표 ↔ 타일 좌표를 정규화
+- 클릭 판정은 물리 레이캐스트가 아니라 `CellFromRay` — 타일을 윗면 한 장이 아니라 바닥까지 이어진 기둥으로 보고 맞힌다. 옆면을 눌러도 그 타일이 잡히고, 앞에 선 높은 타일이 뒤 타일을 가린다
+
+**3축 타일 상태**
+- 지형(Ground / High / Core / Special / Empty) · 점령(배치된 유닛) · 용도(근접·원거리·생산 배치 허용)를 서로 독립된 축으로 저장
+- 통행 가능 여부는 지형이 정한다 — 지상·본진만 통행, 고지·빈 칸은 길을 막는다
+- 적 점유(`Enemies`)는 유닛 점유(`OccupantObject`)와 별개다: 한 칸에 여러 마리가 드나든다
+
+**미리 계산해 두는 이웃 · 거리**
+- `TileLink.LinkNeighbors`가 Build 때 상하좌우 이웃을 타일에 새긴다 — A\*가 좌표를 더해 격자를 뒤지지 않고 타일이 든 이웃 목록을 바로 읽는다
+- 타일 → 가장 가까운 본진까지 칸 거리를 Build 때 한 번 재 두고(`_coreDistance`), A\* 휴리스틱이 그대로 꺼내 쓴다
+- 사거리·타겟팅은 `MapBoard.GetTiles(origin, range)` — 기본 다이아몬드, `square` 옵션으로 정사각형
+
+### 2. 적 웨이브 · 결정적 재현
+
+**문제**
+- 포탈은 낮에 추첨하고 적은 밤에 스폰된다. 그 사이에 세이브 로드·일차 복원이 끼어들 수 있다
+- 웨이브 행마다 `.Forget()`으로 코루틴이 동시에 돌아, 어느 행의 몇 번째 적이 먼저 뽑히는지가 프레임 타이밍에 따라 달라진다
+- 순차 소비형 난수기 하나를 돌려 쓰면 그 순서가 흔들리는 순간 같은 시드에서도 결과가 달라진다
+
+**유도 문자열 분리**
+- `(게임 시드, 지역, 일차)` → 그날 열리는 포탈
+- `(게임 시드, 지역, 일차, 웨이브 행, 마릿수 인덱스)` → 적 한 마리가 어느 포탈에서 어느 갈래로 나오는지
+- 포탈 개수·조합·경로 추첨을 각각 다른 유도 키(`:portalcount` / `:portalpick` / `:path`)로 뽑는다 — 개수 하나가 바뀌어도 뒤따르는 추첨이 통째로 밀리지 않는다
+- 세이브를 다시 로드해도 그날 포탈과 적별 경로까지 그대로 재현된다
+
+**웨이브 스케일링**
+- `WaveTable` CSV로 지역·라운드별 몹 구성 저작
+- 10일차 초과는 1001~1005 라운드로 순환 조회(`GetStageLookupId`), 마릿수는 라운드가 돌수록 배율(`GetScaleCount`)
+- 증원 — 해금 지역 수 − 1 단계만큼 자기 지역 전용 증원 몹(`ReinforceBaseId` 9001+)이 덧붙는다
+- 10의 배수 일차는 보스 라운드 — 1지역은 코어에서 가장 먼 "끝 구석" 포탈 1개로 고정(`ActivateCornerPortal`), 보스는 지연 후 등장
+
+```mermaid
+graph LR
+    SEED[GameSeed] --> D1
+    subgraph 낮
+        D1["포탈 추첨<br/>seed:portal:region:day"] --> P[활성 포탈 N개]
+    end
+    subgraph 밤
+        P --> W[WaveTable<br/>지역·라운드 CSV]
+        W --> R["적 마리마다<br/>seed:path:region:day:row:i"]
+        R --> PATH[포탈·갈래·저작 경로 선택]
+    end
+    SAVE[(세이브)] -.로드해도 동일.-> D1
+```
+
+### 3. 낮/밤 자원 사이클
+
+**FSM 하루 루프**
+- `DayState` : `dayCount++`, 오늘 아침 체력 스냅샷(`todayHp`), 10일차마다 지원 요청 플래그
+- `NightState` : 낮 → 밤 연출이 끝나 `CanSpawnEnemy`가 서면 웨이브 스폰
+- `ResultState` : 해금된 전 지역 전멸 시 진입, 지원 요청 상태면 다음 모듈 해금 후 낮으로
+
+**자원 획득 — 밤이 끝날 때 한 번**
+- `EnviromentManager`가 조명·스카이박스·BGM 보간을 끝낸 뒤 `OnDay` 이벤트를 쏜다
+- `FacilityManager`가 그 이벤트에 걸려 `SumProduct` — 생산 건물마다 투입된 시민 수에 비례한 생산량을 합산해 `ResourcesManager`에 넣는다
+- 완벽 방어(`Hp == todayHp`)로 밤을 넘기면 특수 자원 1개, 특수 자원은 `TradeResource`로 원하는 자원과 교환
+
+**자원 소모**
+- 시민은 식량을 소모해 생성, `CitizenManager`가 생산 투입분(`usedCitizen`)과 영웅 투입분(`heroUsedCitizen`)을 따로 세고 가용분(`CanUseCitizen`)을 계산
+- 건물 업그레이드 · 영웅 생성 · 영웅 업그레이드가 자원을 소모, 영웅 생성가는 그날 생성 횟수에 따라 점증(`heroesCreatedToday`)
+
+### 4. 맵 에디터 툴
+
+**Map Maker (`Tools/Map/Map Maker`)**
+- 팔레트(무엇을)와 도구(어떻게)를 분리 — 같은 "지상"을 골라도 칠하기는 데이터만 바꾸고 교체는 큐브 실물을 갈아끼운다. 토글 하나로 뜻이 바뀌지 않는다
+- 붓질 한 번 = 되돌리기 한 단계(`TileStamp.BeginStroke` / `EndStroke`), Shift+클릭 구간 채우기, Alt+클릭 끄기
+- 누르기 전에 이 클릭이 무엇이 될지 알리는 예고줄, 지금 가리키는 칸의 3축 상태를 읽는 상태줄
+- 일차 탭 — 날짜별로 다른 적 경로를 저작
+- `TileAuthorRule.FindProblems` 저작 린트(경로 끊김·본진 없음 등), `TileOverride`가 "프리팹인 줄 알고 씬 인스턴스를 칠하는" 사고를 표식으로 조기 경고
+
+**그 밖의 메뉴 툴**
+- `Tools/Map/Bake Tile Positions` — 큐브 월드 위치에서 타일 좌표를 새김
+- `Tools/Enemy/Enemy Route Maker` — 공중·수영 적 저작 경로, `Enemy Icon Baker` — 적 아이콘 일괄 생성
+- CSV 임포터 — `Import HeroTable` / `HeroStatTable` / `SkillTable` / `DebuffTable`
+- `Tools/Debug/자원 치트`, `Tools/Localize/*` (LocalizeText 키 검사·부착)
+
+---
+
 ## 아키텍처
 
 ```mermaid
