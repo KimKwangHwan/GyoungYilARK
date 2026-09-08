@@ -148,6 +148,14 @@ public class FogController : MonoBehaviour
         ApplyAreas();
     }
 
+    // 포토모드 캡처가 캐릭터만 깨끗이 뽑도록 잠시 안개 셰이더 효과를 껐다 켠다.
+    // fogEnabled 스위치와 같은 메커니즘 - 그릴 안개 영역 수를 0으로 만들어 없앤다.
+    public void SetFogVisible(bool visible)
+    {
+        Shader.SetGlobalInt(CountId, visible ? _count : 0);
+        if (visible) ApplyOpenState();
+    }
+
     private void RevealUnlocked()
     {
         for (int i = 0; i < _modules.Count; i++)
