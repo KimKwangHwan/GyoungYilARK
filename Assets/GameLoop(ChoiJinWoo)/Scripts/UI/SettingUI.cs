@@ -14,9 +14,11 @@ public class SettingUI : MonoBehaviour, IExclusiveUiPanel
     [SerializeField] private Slider bgmVolume;
     [SerializeField] private Slider sfxVolume;
     [SerializeField] private Slider systemVolume;
+    // 전용 전체화면(ExclusiveFullScreen)은 D3D12 백엔드에서 Print Screen/Alt+Tab 등
+    // 전체화면 상태 전환 시 복구 불가능한 GPU 디바이스 오류로 크래시하므로 제외한다.
+    // "전체 화면" 항목은 테두리 없는 창(FullScreenWindow)에 매핑한다.
     private readonly FullScreenMode[] screenModes =
     {
-        FullScreenMode.ExclusiveFullScreen,
         FullScreenMode.FullScreenWindow,
         FullScreenMode.Windowed,
     };
@@ -65,10 +67,11 @@ public class SettingUI : MonoBehaviour, IExclusiveUiPanel
         //창 모드
         screenMode.ClearOptions();
 
+        // 이 목록은 아래 RefreshDropdown()에도 같은 순서로 존재한다 - screenModes 배열과
+        // 항목 수가 어긋나면 ChangeScreenMode에서 IndexOutOfRange가 나므로 함께 수정할 것.
         var options = new List<string>
         {
-            DataTableManager.StringTable.Get("UI_Setting_FullScreen"),
-            DataTableManager.StringTable.Get("UI_Setting_BorderlessWindow"),
+            DataTableManager.StringTable.Get("UI_Setting_FullScreen"), // FullScreenWindow에 매핑
             DataTableManager.StringTable.Get("UI_Setting_Window"),
         };
         screenMode.AddOptions(options);
@@ -207,10 +210,10 @@ public class SettingUI : MonoBehaviour, IExclusiveUiPanel
     {
         screenMode.ClearOptions();
 
+        // OnEnable의 목록과 항상 동일하게 유지할 것 (screenModes 배열과 항목 수 일치).
         var options = new List<string>
         {
             DataTableManager.StringTable.Get("UI_Setting_FullScreen"),
-            DataTableManager.StringTable.Get("UI_Setting_BorderlessWindow"),
             DataTableManager.StringTable.Get("UI_Setting_Window"),
         };
         screenMode.AddOptions(options);
