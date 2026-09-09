@@ -24,11 +24,22 @@
 
 | 항목 | 내용 |
 | --- | --- |
-| 장르 | 시티빌딩 × 그리드 타워디펜스 하이브리드 |
-| 플랫폼 | PC (세로 화면) |
+| 장르 | 타워디펜스 |
+| 플랫폼 | PC |
 | 팀 구성 | 프로그래머 4인 |
 | 개발 기간 | 2026.07 ~ 2026.09 |
 | 엔진 | Unity `6000.3.15f1` (Unity 6.3) / URP `17.3` |
+
+---
+
+## 기술 스택
+
+`Unity 6.3` · `C#` · `URP 17.3` · `Shader Graph` · `VFX Graph`
+[`VContainer`](https://github.com/hadashiA/VContainer) (DI) · [`UniTask`](https://github.com/Cysharp/UniTask) (비동기) · `NuGetForUnity`
+
+상태 전이는 게임/영웅 모두 직접 구현한 FSM, 이벤트는 C# `event` 기반이다.
+
+---
 
 ## 게임 구성
 
@@ -54,6 +65,20 @@
 **적**
 - 스폰 지점으로부터 본진까지 경로를 따라 이동합니다.
 - 사거리 안의 영웅과 전투하고 본진에 침투하면 본진 체력이 감소되며 소멸합니다.
+
+## 담당 파트
+
+저장소 단일 최다 기여자 — 고유 커밋 약 584개(전체의 약 43%). 담당 축은 **"영웅"** 하나로 요약된다.
+
+- **영웅 전투·성장** (`Assets/Script/Hero/` — 93개 파일 중 87개 주작성) — 데이터 주도 공격 시스템, 영웅 FSM, 트레잇 조합, 스탯·업그레이드 파이프라인, 합성, 전투 VFX·파티클 최적화 *(상세는 아래 기술적 하이라이트)*
+- **영웅 수급·로스터 UI** (`GameLoop/HeroView/`) — 생성 패널(일일·지역 가격 점증), 로스터 아이콘, `ObjectPool` 기반 UI
+- **플레이어 액티브 스킬** (`Assets/Script/PlayerSkill/`) — 영웅 SP와 별개인 지휘관 마나(밤에만 재생), 필드 타일 클릭 장판
+- **공유 버프 런타임** — `BuffManager` 스택/영구(`Persistent`) 버프 레이어 (오라·장판 모델링)
+- **영웅 데이터 CSV 파이프라인** — `HeroTable` / `HeroStatTable` + 임포터 2종
+- **에디터 툴** — `AttackDataSO` 커스텀 인스펙터, Hero·Enemy 스탯 시뮬레이터(Play 모드 불필요), 공격 데이터 마이그레이션, 낮/밤·자원 치트 뷰
+- **결정적 시드** (`GameSeeding`) — 영웅 생성·합성이 시드 유도값을 공유해 세이브를 되돌려도 재현
+
+전체 파일 목록·라인 수·팀원 담당 구분은 [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) 참고.
 
 ## 기술적 하이라이트
 
@@ -169,49 +194,4 @@ graph TD
     MB -->|타일 사거리·타겟팅| HERO
 
     style 영웅 fill:#1f6feb22,stroke:#1f6feb
-```
-
----
-
-## 기술 스택
-
-`Unity 6.3` · `C#` · `URP 17.3` · `Shader Graph` · `VFX Graph`
-[`VContainer`](https://github.com/hadashiA/VContainer) (DI) · [`UniTask`](https://github.com/Cysharp/UniTask) (비동기) · `NuGetForUnity`
-
-상태 전이는 게임/영웅 모두 직접 구현한 FSM, 이벤트는 C# `event` 기반이다.
-
----
-
-## 코드 하이라이트
-
-설계 의도가 드러나는 인터페이스만 발췌 (구현 생략).
-
-```csharp
-// "결정된 AttackDataSO 한 방을 어떤 '시간적 형태'로 집행하는가" — Discrete(1회) vs Continuous(채널링).
-// executor(무엇으로 때리는가)와 독립된 축. hero 를 함께 받는 이유: AttackContext 는 struct 라
-// 넘겨받은 ctx 는 호출 시점 스냅샷이라, 몇 초 도는 채널링 중 "지금 살아있는" 타겟을 다시 확인하려면
-// hero 를 직접 들고 있어야 한다.
-public interface IAttackDeliveryStrategy
-{
-    UniTask Deliver(Hero hero, AttackDataSO data, AttackContext ctx,
-                    IAttackExecutor executor, CancellationToken ct);
-}
-
-// "무엇으로 때리는가" — 근접 / 원거리(투사체) / 힐. 클래스별 AttackState 가 주입한다.
-public interface IAttackExecutor
-{
-    UniTask Execute(AttackDataSO data, AttackContext ctx, CancellationToken ct);
-}
-
-// 트레잇은 SO 가 아니라 같은 프리팹에 붙는 컴포넌트다 — Hero.Awake 가 GetComponents 로 수집하고
-// 공격/피격/처치/낮 시작 등의 시점에 훅을 팬아웃한다. 새 특성 = 클래스 하나 + 프리팹에 부착.
-public abstract class HeroTrait : MonoBehaviour
-{
-    public virtual void OnAttackPerformed(AttackDataSO data) { }
-    public virtual void OnAttackResolved(AttackDataSO data) { }
-    public virtual void OnHit(GameObject target, int amount, bool isCrit) { }
-    public virtual void OnKill(GameObject target) { }
-    public virtual void OnPassiveTick(float deltaTime) { }
-    public virtual void OnDayStart() { }
-}
 ```
