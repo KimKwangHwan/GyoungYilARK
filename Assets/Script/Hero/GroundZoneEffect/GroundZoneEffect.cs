@@ -55,6 +55,7 @@ public class GroundZoneEffect : MonoBehaviour
     private Action<GameObject> release;
     private CancellationTokenSource cts;
     private GameObject selfEffectInstance;
+    private bool selfEffectVisible = true;
     private readonly HashSet<Hero> buffedAllies = new();
     private readonly Dictionary<Hero, GameObject> buffEffectInstances = new();
     private readonly HashSet<Hero> healPresentAllies = new();
@@ -70,17 +71,24 @@ public class GroundZoneEffect : MonoBehaviour
         this.owner = owner;
         this.followOwner = followOwner;
         this.release = release;
+        selfEffectVisible = true;
         ApplyVisualScale();
         SpawnSelfEffect();
         if (!string.IsNullOrEmpty(spawnSoundKey)) EnemySoundManager.Play(spawnSoundKey, at: transform.position);
         if (!string.IsNullOrEmpty(sustainSoundKey)) sustainVoice = EnemySoundManager.PlayLoop(sustainSoundKey);
         if (duration > 0f) FitParticlesToDuration(duration);
+
+        // 생명주기 루프는 여기서 시작한다 — OnEnable(풀에서 SetActive되는 순간, Init보다 먼저 도는
+        // 시점)에서 시작하면 owner/board/selfEffectInstance가 아직 이전 대여의 잔여값이거나 null인
+        // 채로 첫 프레임이 돌아 UpdatePersistentEffectVisibility가 엉뚱한 인스턴스를 만지거나,
+        // 오라(owner==null)일 땐 루프가 즉시 종료되며 자기 자신을 풀에 반납해버린다.
+        cts ??= new CancellationTokenSource();
+        RunLifetime(cts.Token).Forget();
     }
 
     private void OnEnable()
     {
         cts = new CancellationTokenSource();
-        RunLifetime(cts.Token).Forget();
     }
 
     private void OnDisable()
@@ -122,9 +130,23 @@ public class GroundZoneEffect : MonoBehaviour
             // gameObject 등 네이티브 접근은 전부 건너뛴다 — 반납할 풀도 소유자와 함께 사라지는 것이므로 안전하다.
             if (this != null)
             {
-                if (duration <= 0f && selfEffectInstance != null)
+                if (duration <= 0f && selfEffectInstance != null && owner != null)
                     owner.DespawnEffect(selfEffect, selfEffectInstance);
-                release?.Invoke(gameObject);
+
+                // 풀로 돌아가기 전에 이번 생애의 잔여 상태를 전부 걷어낸다. 다음 대여 때 이 필드들이
+                // 남아있으면(Init 전 첫 프레임/재사용 시) 이전 생애의 selfEffect/owner를 만지게 된다.
+                // PlayerGroundZoneEffect.DespawnSelfEffect가 selfEffectInstance를 null로 되돌리는 것과 같은 취지.
+                Action<GameObject> pendingRelease = release;
+                selfEffectInstance = null;
+                selfEffectVisible = true;
+                owner = null;
+                board = null;
+                release = null;
+                followOwner = false;
+                buffEffectInstances.Clear();
+                healEffectInstances.Clear();
+
+                pendingRelease?.Invoke(gameObject);
             }
         }
     }
@@ -212,8 +234,19 @@ public class GroundZoneEffect : MonoBehaviour
     // 데미지/힐/버프 적용 로직과는 무관하게 실행되므로 화면 표시 여부가 판정에 영향을 주지 않는다.
     private void UpdatePersistentEffectVisibility()
     {
+        if (owner == null) return; // Init 전(잔여 상태)엔 손대지 않는다
+
         if (selfEffectInstance != null)
-            VfxVisibility.SetVisualActive(selfEffectInstance, !VfxVisibility.IsOffscreen(selfEffectInstance.transform.position));
+        {
+            // Projectile.UpdateVisibility와 동일한 상태변화 가드 — 화면 안/밖이 실제로 바뀌는
+            // 순간에만 토글한다(매 프레임 SetVisualActive를 때리지 않도록).
+            bool visible = !VfxVisibility.IsOffscreen(selfEffectInstance.transform.position);
+            if (visible != selfEffectVisible)
+            {
+                selfEffectVisible = visible;
+                VfxVisibility.SetVisualActive(selfEffectInstance, visible);
+            }
+        }
         foreach (GameObject fx in buffEffectInstances.Values)
             if (fx != null)
                 VfxVisibility.SetVisualActive(fx, !VfxVisibility.IsOffscreen(fx.transform.position));

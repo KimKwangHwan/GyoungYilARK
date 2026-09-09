@@ -18,7 +18,10 @@ public static class VfxVisibility
     public static bool Enabled = true;
 
     private static Camera mainCam;
-    private static Camera MainCam => mainCam != null ? mainCam : (mainCam = Camera.main);
+    // 캐시가 파괴됐거나 비활성(씬 전환/낮밤 카메라 교체 등)이면 다시 찾는다 — 한 번 엉뚱한
+    // 카메라를 물면 WorldToViewportPoint가 항상 화면 밖으로 나와 이펙트가 통째로 안 보이게 된다.
+    private static Camera MainCam =>
+        mainCam != null && mainCam.isActiveAndEnabled ? mainCam : (mainCam = Camera.main);
 
     // 카메라가 오빗+줌(distance 5~120, pitch 5~89°)이라 절대 거리로는 판정할 수 없어 뷰포트로
     // 투영한다 — 줌/팬/피치/종횡비가 전부 반영된다. 탑다운이라 높낮이도 투영이 알아서 처리한다.
@@ -39,15 +42,19 @@ public static class VfxVisibility
     // 이미 스폰된(계속 추적 중인) 인스턴스를 파괴하지 않고 화면 밖일 때만 렌더링/시뮬레이션을 끈다.
     // 렌더러는 enabled로 즉시 안 보이게, 파티클은 Pause/Play로 시뮬레이션 자체를 멈춰 최적화 취지를
     // 살린다. 게임플레이 로직(콜라이더/이동/틱)은 건드리지 않으므로 피격 판정과는 무관하다.
+    //
+    // 멱등하게 동작한다 — 이미 원하는 상태면 아무것도 하지 않는다. 호출부가 매 프레임 불러도
+    // 안전하도록(특히 active==true를 반복 호출해도 재생 중인 1회성 파티클을 매 프레임 되감지
+    // 않도록: Play는 '일시정지 상태'일 때만 건다).
     public static void SetVisualActive(GameObject instance, bool active)
     {
         if (instance == null) return;
         foreach (Renderer r in instance.GetComponentsInChildren<Renderer>(true))
-            r.enabled = active;
+            if (r.enabled != active) r.enabled = active;
         foreach (ParticleSystem ps in instance.GetComponentsInChildren<ParticleSystem>(true))
         {
-            if (active) ps.Play(true);
-            else ps.Pause(true);
+            if (active) { if (ps.isPaused) ps.Play(true); }
+            else { if (!ps.isPaused && !ps.isStopped) ps.Pause(true); }
         }
     }
 }
