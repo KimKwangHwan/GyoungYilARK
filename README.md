@@ -1,6 +1,6 @@
 # PioneerOfFelucia
 
-> 낮에는 마을을 세우고, 밤에는 그리드에 배치한 영웅으로 웨이브를 막는 **시티빌딩 × 그리드 타워디펜스** 하이브리드.
+> 낮에는 마을을 세우고, 밤에는 그리드에 배치한 영웅으로 웨이브를 막는 타워 디펜스 게임
 
 ![Unity](https://img.shields.io/badge/Unity-6000.3.15f1-black?logo=unity)
 ![Language](https://img.shields.io/badge/C%23-239120?logo=csharp&logoColor=white)
