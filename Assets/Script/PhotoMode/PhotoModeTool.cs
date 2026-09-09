@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
@@ -18,6 +19,10 @@ public class PhotoModeTool : MonoBehaviour
     private const int Scale = 2;          // 캡처 해상도 = 창 크기 ×2
     private const float LookSens = 0.2f;  // 궤도 회전 감도(픽셀당 도)
     private const float PanSpeed = 12f;   // WASD/QE 초점 이동 속도(월드 단위/초)
+
+    // 우상단 IMGUI 패널 사각형(GUI 좌표: 좌상단 원점). OnGUI 와 히어로 클릭 판정이 공유한다.
+    private static readonly Vector2 PanelSize = new(260f, 430f);
+    private Rect PanelRect => new(Screen.width - PanelSize.x - 12f, 12f, PanelSize.x, PanelSize.y);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -39,6 +44,11 @@ public class PhotoModeTool : MonoBehaviour
     private CameraRig rig;
     private float savedMinDistance;
     private float savedMinPitch;
+
+    // 맵 클릭 인계 - 포토 모드 동안 기존 타일 클릭 시스템을 막고(패널/빈 곳 클릭이 선택을 풀지 못하게)
+    // LMB 히어로 선택은 이 툴이 직접 레이캐스트로 처리한다.
+    private MapInput mapInput;
+    private bool savedMapBlocked;
 
     // 궤도 상태
     private Vector3 orbitFocus;
@@ -94,7 +104,11 @@ public class PhotoModeTool : MonoBehaviour
             return;
         }
 
-        if (!capturing) OrbitInput();
+        if (!capturing)
+        {
+            OrbitInput();
+            HeroPickInput();
+        }
         ApplyOrbit();
     }
 
@@ -111,6 +125,15 @@ public class PhotoModeTool : MonoBehaviour
         Time.timeScale = 0f;
 
         HideHud();
+
+        // 기존 타일 클릭 시스템을 막는다 - 안 막으면 IMGUI 패널/빈 곳 클릭이 그대로 맵으로 흘러가
+        // PlaceAction.ShowOutline → HeroSelectionService.Clear() 로 선택이 즉시 풀린다.
+        mapInput = FindAnyObjectByType<MapInput>();
+        if (mapInput != null)
+        {
+            savedMapBlocked = mapInput.Blocked;
+            mapInput.SetBlock(true);
+        }
 
         mainCamInput = mainCam.GetComponent<CameraInput>();
         if (mainCamInput != null) mainCamInput.enabled = false;
@@ -141,6 +164,9 @@ public class PhotoModeTool : MonoBehaviour
         mainCam = null;
         mainCamInput = null;
         rig = null;
+
+        if (mapInput != null) mapInput.SetBlock(savedMapBlocked);
+        mapInput = null;
 
         ShowHud();
         Time.timeScale = savedTimeScale;
@@ -211,6 +237,42 @@ public class PhotoModeTool : MonoBehaviour
             if (move != Vector3.zero)
                 orbitFocus += move.normalized * (PanSpeed * Time.unscaledDeltaTime);
         }
+    }
+
+    // LMB 클릭 = 히어로 선택. 맵의 타일 판정은 얕은 궤도 각도에서 캐릭터 몸통을 못 잡으므로
+    // 히어로 콜라이더(Hero.EnsureClickCollider 가 런타임에 붙임)를 직접 레이캐스트한다.
+    // 빗맞은 클릭은 무시한다 - 선택을 풀지 않는다.
+    private void HeroPickInput()
+    {
+        Mouse mouse = Mouse.current;
+        if (mouse == null || !mouse.leftButton.wasPressedThisFrame) return;
+        if (mainCam == null) return;
+
+        Vector2 pos = mouse.position.ReadValue();
+        if (PointerOverPanel(pos)) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+
+        Ray ray = mainCam.ScreenPointToRay(pos);
+        Hero best = null;
+        float bestDist = float.MaxValue;
+        foreach (RaycastHit hit in Physics.RaycastAll(ray, 500f, ~0, QueryTriggerInteraction.Collide))
+        {
+            Hero hero = hit.collider.GetComponentInParent<Hero>();
+            if (hero != null && hit.distance < bestDist)
+            {
+                best = hero;
+                bestDist = hit.distance;
+            }
+        }
+
+        if (best != null) HeroSelectionService.Select(best);
+    }
+
+    // Input System 마우스 좌표(좌하단 원점)가 IMGUI 패널(좌상단 원점) 위인지.
+    private bool PointerOverPanel(Vector2 screenPos)
+    {
+        Vector2 guiPos = new(screenPos.x, Screen.height - screenPos.y);
+        return PanelRect.Contains(guiPos);
     }
 
     private void ApplyOrbit()
@@ -366,10 +428,8 @@ public class PhotoModeTool : MonoBehaviour
         if (!active) return;
 
         GUI.skin.label.richText = true;
-        const float width = 260f;
-        float x = Screen.width - width - 12f;
 
-        GUILayout.BeginArea(new Rect(x, 12f, width, 430f), GUI.skin.box);
+        GUILayout.BeginArea(PanelRect, GUI.skin.box);
 
         GUILayout.Label("<b>포토 모드</b>  (F12 / ESC 종료)");
         GUILayout.Label("<i>RMB 회전 · 휠 줌 · MMB/WASD·QE 이동</i>");
