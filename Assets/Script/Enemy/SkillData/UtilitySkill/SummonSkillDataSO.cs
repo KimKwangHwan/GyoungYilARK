@@ -101,7 +101,7 @@ public class SummonSkillDataSO : UtilitySkillDataSO
         if (summonEffectPrefab != null)
         {
             // Spawn은 넘긴 회전으로 월드 회전을 덮어쓴다 → 프리팹에 구운 회전을 그대로 넘긴다.
-            fx = PoolManager.Instance.Spawn(summonEffectPrefab, owner.transform.position,
+            fx = PoolManager.Instance.SpawnBudgeted(summonEffectPrefab, owner.transform.position,
                                            summonEffectPrefab.transform.rotation);
             FitEffectToRange(fx,owner,1);
         }

@@ -130,11 +130,23 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
     }
 
     // HeroTrait/GroundZoneEffect(같은 GameObject의 다른 컴포넌트)도 써야 해서 public.
+    // 모든 1회성 타격/스킬 이펙트가 결국 여기로 모이므로, ParticleBudget 획득/해제를 이 메서드
+    // 안에서만 짝지어 처리한다 — 장판/빔/상시 이펙트(SpawnEffectAlways, SpawnPersistentEffect
+    // 직접 호출, SpawnGroundZone)는 이 경로를 타지 않으므로 버짓과 무관하게 그대로 동작한다.
     public GameObject SpawnEffect(GameObject prefab, Vector3 pos, Quaternion rot, float lifetime)
     {
+        bool budgeted = lifetime > 0f && ParticleBudget.TryAcquire();
+        if (lifetime > 0f && !budgeted) return null; // 버짓 초과 — 연출 전용이라 생략해도 안전
+
         GameObject go = SpawnPersistentEffect(prefab, pos, rot);
-        if (go != null && lifetime > 0f)
-            ReturnEffectAfter(prefab, go, lifetime).Forget();
+        if (go == null)
+        {
+            if (budgeted) ParticleBudget.Release();
+            return null;
+        }
+
+        if (lifetime > 0f)
+            ReturnEffectAfter(prefab, go, lifetime, budgeted).Forget();
         return go;
     }
 
@@ -239,9 +251,10 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
             UpdateLinkEndpoints(go, from(), to());
     }
 
-    private async UniTask ReturnEffectAfter(GameObject prefab, GameObject go, float delay)
+    private async UniTask ReturnEffectAfter(GameObject prefab, GameObject go, float delay, bool releaseBudget = false)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(delay));
+        if (releaseBudget) ParticleBudget.Release();
         if (go == null) return;
         DespawnEffect(prefab, go);
     }

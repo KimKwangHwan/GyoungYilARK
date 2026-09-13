@@ -49,7 +49,7 @@ public class RushAttackSkillSO : AttackSkillDataSO
         {
             owner.animator.SetTrigger("Skill");
             EnemySoundManager.Play("RushReady", at: owner.transform.position);
-            GameObject go = PoolManager.Instance.Spawn(onSkillEffectPrefab,owner.transform.position,Quaternion.identity);
+            GameObject go = PoolManager.Instance.SpawnBudgeted(onSkillEffectPrefab,owner.transform.position,Quaternion.identity);
             await WaitForAnimationEnd(owner,"Skill",animTimeout,token); // 상태 이름과 정확히 일치해야 함(대소문자 구분)
             PoolManager.Instance.Despawn(go);
             // owner.animator.speed = animSpeed; // WaitForAnimationEnd가 info.length/speed로 대기sdadqqdqddsdfsfdsaafdsadsfasdfdsf하므로 스윙도 그만큼 짧아짐
@@ -92,7 +92,7 @@ public class RushAttackSkillSO : AttackSkillDataSO
         Vector3 pos = p != null ? p.position : owner.transform.position;
         // 위치는 손 앵커, 회전은 owner 정면(LookAt으로 대상을 향함) + 인스펙터 보정.
         Quaternion rot = owner.transform.rotation * Quaternion.Euler(attackEffectEulerOffset);
-        GameObject fx = PoolManager.Instance.Spawn(onAttackEffectPrefab, pos, rot);
+        GameObject fx = PoolManager.Instance.SpawnBudgeted(onAttackEffectPrefab, pos, rot);
         if (attackEffectLifetime > 0f) PoolManager.Instance.Despawn(fx, attackEffectLifetime);
     }
 
