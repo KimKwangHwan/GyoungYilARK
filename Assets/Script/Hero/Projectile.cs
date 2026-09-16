@@ -83,7 +83,17 @@ public class Projectile : MonoBehaviour
     // 라인 관통형 visualOnly 화살 전용 — destination(라인 끝)에 닿기 전에 지나치는 중간 타격 지점들.
     // 가까운 순으로 미리 정렬해서 넘겨받고, 화살이 실제로 그 지점을 지나칠 때마다 순서대로 소비한다.
     private List<Vector3> pendingHitPoints;
+    private List<GameObject> pendingHitTargets;
     private int nextHitIndex;
+
+    public Projectile CreatePooledInstance()
+    {
+        Projectile instance = Instantiate(this);
+        // PierceArrow처럼 피격 이펙트가 프리팹의 자식이어도 원본 참조를 공유한다.
+        // 복제된 자식을 키로 쓰면 같은 이펙트가 발사체마다 다른 종류로 집계된다.
+        instance.hitEffectPrefab = hitEffectPrefab;
+        return instance;
+    }
 
     public void Launch(Transform target, float damage, IObjectPool<Projectile> pool, ProjectileAoEConfig cfg)
     {
@@ -102,7 +112,8 @@ public class Projectile : MonoBehaviour
         SpawnFlashEffect(cfg.hero);
     }
 
-    public void LaunchVisualOnly(Vector3 destination, IObjectPool<Projectile> pool, Hero hero, List<Vector3> hitPoints = null)
+    public void LaunchVisualOnly(Vector3 destination, IObjectPool<Projectile> pool, Hero hero,
+        List<Vector3> hitPoints = null, List<GameObject> hitTargets = null)
     {
         this.destination = destination;
         this.pool = pool;
@@ -111,6 +122,7 @@ public class Projectile : MonoBehaviour
         this.target = null;
         elapsed = 0f;
         pendingHitPoints = hitPoints;
+        pendingHitTargets = hitTargets;
         nextHitIndex = 0;
         ResetVisibility();
 
@@ -184,7 +196,11 @@ public class Projectile : MonoBehaviour
                 // 적들이 서로 가까우면 화살이 지나는 간격이 0.05초 스로틀보다 짧아 대부분 씹힐 수 있다 —
                 // 한 발이 라인 위 여러 적을 연속으로 맞히는 의도된 다중 히트이므로 스로틀을 우회한다.
                 if (!string.IsNullOrEmpty(hitSoundKey)) EnemySoundManager.Play(hitSoundKey, ignoreThrottle: true, at: hitPoint);
-                SpawnHitEffect(hitPoint);
+                if (pendingHitTargets != null && nextHitIndex < pendingHitTargets.Count)
+                    AttackDamageUtil.SpawnHitEffect(hero, hitEffectPrefab, pendingHitTargets[nextHitIndex],
+                        hitEffectLifetime, hitPoint);
+                else
+                    SpawnHitEffect(hitPoint);
                 nextHitIndex++;
             }
         }
@@ -269,8 +285,7 @@ public class Projectile : MonoBehaviour
         Return();
     }
 
-    // 라인 관통형 시각 전용 화살(visualOnly)의 착탄 연출 전용 — 실제 적 타겟이 없는 고정 좌표라
-    // 대상별 중복 방지 대상이 아니다(그 적들의 히트 이펙트는 발사 전에 이미 따로 적용됨).
+    // 대상이 없는 라인 끝점 등의 착탄 연출 전용. 적을 지나치는 중간 타격은 대상별 제한을 거친다.
     private void SpawnHitEffect(Vector3 pos)
     {
         if (hitEffectPrefab != null)
@@ -281,12 +296,12 @@ public class Projectile : MonoBehaviour
         => AttackDamageUtil.SpawnHitEffect(hero, hitEffectPrefab, target, hitEffectLifetime);
 
     // Area 타입 착탄 전용 — 맞은 적마다 따로 띄우지 않고, 착탄 중심에 areaRange 크기로 스케일한
-    // 이펙트 하나만 띄운다. 착탄당 정확히 1회만 호출되므로 SpawnHitEffect(GameObject)와 달리 대상별
-    // 중복 방지 디바운스가 필요 없다.
+    // 이펙트 하나만 띄운다. 여러 발이 같은 적에게 겹쳐 착탄할 수 있으므로 주 타겟의 제한을 공유한다.
     private void SpawnAreaHitEffect(Vector3 pos, int range)
     {
         if (hitEffectPrefab == null) return;
-        GameObject go = hero.SpawnEffect(hitEffectPrefab, pos, hitEffectLifetime);
+        GameObject go = AttackDamageUtil.SpawnHitEffect(hero, hitEffectPrefab,
+            target != null ? target.gameObject : null, hitEffectLifetime, pos);
         if (go != null && hitEffectVisualRadius > 0f)
             go.transform.localScale = Vector3.one * (range / hitEffectVisualRadius);
     }
