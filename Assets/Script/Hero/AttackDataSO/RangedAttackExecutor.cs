@@ -93,6 +93,7 @@ public class RangedAttackExecutor : IAttackExecutor
                 Vector3.SqrMagnitude(AttackDamageUtil.EffectPosition(a as Component) - ctx.self.position)
                     .CompareTo(Vector3.SqrMagnitude(AttackDamageUtil.EffectPosition(b as Component) - ctx.self.position)));
             List<Vector3> hitPoints = new List<Vector3>(enemies.Count);
+            List<GameObject> hitTargets = new List<GameObject>(enemies.Count);
             foreach (IDamageAble e in enemies)
             {
                 e.TakeDamage(damage);
@@ -102,11 +103,12 @@ public class RangedAttackExecutor : IAttackExecutor
                     (p, r, s) => ctx.hero.GetObjectsInRange(p, r, s, RangeQueryAffinity.Ally), damage, ctx.sc[StatType.ATK]);
                 AttackDamageUtil.SpawnHitEffect(ctx.hero, data.hitEffect, e as Component, data.hitEffectLifetime);
                 hitPoints.Add(AttackDamageUtil.EffectPosition(e as Component));
+                hitTargets.Add((e as Component)?.gameObject);
             }
             if (data.groundZonePrefab != null)
                 ctx.hero.SpawnGroundZone(data.groundZonePrefab, target.position);
             Vector3 endPoint = ctx.hero.GetLineEndPoint(ctx.self.position, dir, data.lineLength);
-            arrow.LaunchVisualOnly(endPoint, pool, ctx.hero, hitPoints);
+            arrow.LaunchVisualOnly(endPoint, pool, ctx.hero, hitPoints, hitTargets);
             return;
         }
 

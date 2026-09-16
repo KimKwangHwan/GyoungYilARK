@@ -117,7 +117,7 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
         if (!projectilePools.TryGetValue(prefab, out var pool))
         {
             pool = new ObjectPool<Projectile>(
-                createFunc: () => Instantiate(prefab),
+                createFunc: () => prefab.CreatePooledInstance(),
                 actionOnGet: p => p.gameObject.SetActive(true),
                 actionOnRelease: p => p.gameObject.SetActive(false),
                 actionOnDestroy: p => Destroy(p.gameObject),
@@ -130,11 +130,23 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
     }
 
     // HeroTrait/GroundZoneEffect(같은 GameObject의 다른 컴포넌트)도 써야 해서 public.
-    public GameObject SpawnEffect(GameObject prefab, Vector3 pos, Quaternion rot, float lifetime)
+    // 모든 1회성 타격/스킬 이펙트가 결국 여기로 모이므로, ParticleBudget 획득/해제를 이 메서드
+    // 안에서만 짝지어 처리한다 — 장판/빔/상시 이펙트(SpawnEffectAlways, SpawnPersistentEffect
+    // 직접 호출, SpawnGroundZone)는 이 경로를 타지 않으므로 버짓과 무관하게 그대로 동작한다.
+    public GameObject SpawnEffect(GameObject prefab, Vector3 pos, Quaternion rot, float lifetime, Action onReturned = null)
     {
+        bool budgeted = lifetime > 0f && ParticleBudget.TryAcquire();
+        if (lifetime > 0f && !budgeted) return null; // 버짓 초과 — 연출 전용이라 생략해도 안전
+
         GameObject go = SpawnPersistentEffect(prefab, pos, rot);
-        if (go != null && lifetime > 0f)
-            ReturnEffectAfter(prefab, go, lifetime).Forget();
+        if (go == null)
+        {
+            if (budgeted) ParticleBudget.Release();
+            return null;
+        }
+
+        if (lifetime > 0f)
+            ReturnEffectAfter(prefab, go, lifetime, budgeted, onReturned).Forget();
         return go;
     }
 
@@ -154,8 +166,8 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
     // localRotation을 쓰는 이유: hitEffect 필드가 (일부 장판 프리팹처럼) 스폰된 다른 오브젝트의
     // 자식 Transform을 직접 가리키는 경우가 있는데, 그때 rotation(월드)을 읽으면 부모(장판 루트 등)의
     // 런타임 회전과 합성되어 버린다. 진짜 프리팹 애셋 루트는 parent가 없어 local==world라 안전하다.
-    public GameObject SpawnEffect(GameObject prefab, Vector3 pos, float lifetime)
-        => SpawnEffect(prefab, pos, prefab != null ? prefab.transform.localRotation : Quaternion.identity, lifetime);
+    public GameObject SpawnEffect(GameObject prefab, Vector3 pos, float lifetime, Action onReturned = null)
+        => SpawnEffect(prefab, pos, prefab != null ? prefab.transform.localRotation : Quaternion.identity, lifetime, onReturned);
 
     public GameObject SpawnPersistentEffect(GameObject prefab, Vector3 pos)
         => SpawnPersistentEffect(prefab, pos, prefab != null ? prefab.transform.localRotation : Quaternion.identity);
@@ -208,7 +220,9 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
     // TrackLinkEndpoints로 계속 그 대상들을 따라가게 한다(대상이 움직이는 동안 얼어붙지 않도록).
     public GameObject SpawnChainArc(GameObject prefab, GameObject fromTarget, GameObject toTarget, float lifetime)
     {
-        GameObject go = SpawnEffect(prefab, AttackDamageUtil.EffectPosition(fromTarget), lifetime);
+        if (fromTarget == null || toTarget == null) return null;
+        GameObject go = AttackDamageUtil.SpawnHitEffect(this, prefab, toTarget, lifetime,
+            AttackDamageUtil.EffectPosition(fromTarget));
         TrackLinkEndpoints(go, AttackDamageUtil.TrackingPosition(fromTarget), AttackDamageUtil.TrackingPosition(toTarget));
         return go;
     }
@@ -239,11 +253,19 @@ public class Hero : MonoBehaviour, IDamageAble, IUnit, IStunAble, IDebuffCarrier
             UpdateLinkEndpoints(go, from(), to());
     }
 
-    private async UniTask ReturnEffectAfter(GameObject prefab, GameObject go, float delay)
+    private async UniTask ReturnEffectAfter(GameObject prefab, GameObject go, float delay, bool releaseBudget = false,
+        Action onReturned = null)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(delay));
-        if (go == null) return;
-        DespawnEffect(prefab, go);
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(delay));
+            if (go != null) DespawnEffect(prefab, go);
+        }
+        finally
+        {
+            if (releaseBudget) ParticleBudget.Release();
+            onReturned?.Invoke();
+        }
     }
 
     // GroundZoneEffect 프리팹을 풀에서 꺼내 위치를 잡고 Init만 넘긴다 — 이후 틱/소멸(풀 반납)은

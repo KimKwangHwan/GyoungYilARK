@@ -151,6 +151,21 @@ public class PoolManager : MonoBehaviour
         return go;
     }
 
+    // Spawn + EnemyParticleBudget 게이팅. 예산이 없으면 스폰 자체를 건너뛰고 null을 반환한다
+    // (연출용 이펙트라 스킵해도 안전 — 호출부는 Hero.SpawnEffect와 같은 방식으로 null을 다룬다).
+    // 해제는 Despawn(GameObject) 한 곳에서만 이뤄지므로 이 이펙트의 Despawn 호출부는 손댈 필요 없다.
+    public GameObject SpawnBudgeted(GameObject prefab, Vector3 pos, Quaternion rot, Transform parent = null)
+    {
+        if (!EnemyParticleBudget.TryAcquire()) return null;
+
+        GameObject go = Spawn(prefab, pos, rot, parent);
+        if (go == null) { EnemyParticleBudget.Release(); return null; }
+
+        var po = go.GetComponent<PooledObject>();
+        if (po != null) po.Budgeted = true;
+        return go;
+    }
+
     public void Despawn(GameObject go)
     {
         if (go == null) return;
@@ -158,6 +173,10 @@ public class PoolManager : MonoBehaviour
         var po = go.GetComponent<PooledObject>();
         if (po == null) { Destroy(go); return; }       // 풀 출신이 아니면 그냥 파괴(안전망)
         if (po.IsReleased) return;                     // 중복 Despawn 가드
+
+        // 풀 반납(SetActive(false)→OnDisable)보다 먼저 지워야, 그 사이 발생할 수 있는
+        // 다른 해제 경로(PooledObject.OnDestroy 안전망)와 중복 해제되지 않는다.
+        if (po.Budgeted) { po.Budgeted = false; EnemyParticleBudget.Release(); }
 
         po.MarkReleased();
         GetPool(po.SourcePrefab).Release(go);

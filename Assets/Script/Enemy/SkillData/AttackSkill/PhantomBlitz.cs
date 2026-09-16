@@ -248,7 +248,7 @@ public class PhantomBlitz : AttackSkillDataSO
     {
         if (prefab == null) return;
         // Spawn은 넘긴 회전으로 월드 회전을 덮어쓴다 → 프리팹에 구워둔 회전을 곱해 넘긴다.
-        GameObject fx = PoolManager.Instance.Spawn(prefab, pos, rot * prefab.transform.rotation);
+        GameObject fx = PoolManager.Instance.SpawnBudgeted(prefab, pos, rot * prefab.transform.rotation);
         if (effectLifetime > 0f) PoolManager.Instance.Despawn(fx, effectLifetime);
     }
 

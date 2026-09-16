@@ -17,7 +17,7 @@ public class ExplosiveSkillSO : AttackSkillDataSO
         // await로 막지 않으므로 데미지가 뒤로 밀리지 않는다.
         if (effectPrefab != null)
         {
-            GameObject go = PoolManager.Instance.Spawn(effectPrefab, owner.transform.position, Quaternion.identity);
+            GameObject go = PoolManager.Instance.SpawnBudgeted(effectPrefab, owner.transform.position, Quaternion.identity);
             if (effectLifetime > 0f) PoolManager.Instance.Despawn(go, effectLifetime);
         }
 

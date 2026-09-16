@@ -34,7 +34,7 @@ public class DashSkillDataSO : UtilitySkillDataSO
         float prevSpeed = owner.animator != null ? owner.animator.speed : 1f; // 대시 후 원래 속도로 복원(슬로우/헤이스트 등 보존)
         // 대시 이펙트: owner에 붙여 대시 내내 따라오게. 위치·회전은 스폰 시점 owner 기준(로컬 변수 — SO 필드에 담으면 여러 적이 공유돼 오염됨).
         Vector3 fxPos = owner.transform.position; // 앞쪽에 두려면 + owner.transform.forward * offset
-        GameObject go = PoolManager.Instance.Spawn(dashEffect, fxPos, owner.transform.rotation, owner.transform);
+        GameObject go = PoolManager.Instance.SpawnBudgeted(dashEffect, fxPos, owner.transform.rotation, owner.transform);
         try
         {
             if (owner.animator != null) owner.animator.speed = 4f;

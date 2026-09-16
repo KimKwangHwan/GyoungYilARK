@@ -24,14 +24,14 @@ public class StompStunSO : UtilitySkillDataSO
         {
             owner.animator.SetTrigger(skillstate);
             await WaitForAnimationEnd(owner, skillstate, 3f, token);
-            GameObject go = PoolManager.Instance.Spawn(shockWaveEffect,owner.transform.position,shockWaveEffect.transform.rotation);
-            go.transform.localScale = Vector3.one;
+            GameObject go = PoolManager.Instance.SpawnBudgeted(shockWaveEffect,owner.transform.position,shockWaveEffect.transform.rotation);
+            if (go != null) go.transform.localScale = Vector3.one;
             await UniTask.Delay(TimeSpan.FromSeconds(0.25f));
-            GameObject go1 = PoolManager.Instance.Spawn(shockWaveEffect,owner.transform.position,shockWaveEffect.transform.rotation);
-            go1.transform.localScale = new Vector3(2f,2f,1f);
+            GameObject go1 = PoolManager.Instance.SpawnBudgeted(shockWaveEffect,owner.transform.position,shockWaveEffect.transform.rotation);
+            if (go1 != null) go1.transform.localScale = new Vector3(2f,2f,1f);
             await UniTask.Delay(TimeSpan.FromSeconds(0.25f));
-            GameObject go2 = PoolManager.Instance.Spawn(shockWaveEffect,owner.transform.position,shockWaveEffect.transform.rotation);
-            go2.transform.localScale = new Vector3(3f,3f,1f);
+            GameObject go2 = PoolManager.Instance.SpawnBudgeted(shockWaveEffect,owner.transform.position,shockWaveEffect.transform.rotation);
+            if (go2 != null) go2.transform.localScale = new Vector3(3f,3f,1f);
             await UniTask.Delay(TimeSpan.FromSeconds(0.25f));
             PoolManager.Instance.Despawn(go);
             PoolManager.Instance.Despawn(go1);

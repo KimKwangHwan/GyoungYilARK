@@ -28,7 +28,7 @@ public class SplitSkillDataSO : UtilitySkillDataSO
         float childHp = owner.MaxHp * hpPercent;
         if(splitEffect!=null)
         {
-            GameObject go = PoolManager.Instance.Spawn(splitEffect,owner.transform.position,Quaternion.identity);
+            GameObject go = PoolManager.Instance.SpawnBudgeted(splitEffect,owner.transform.position,Quaternion.identity);
             PoolManager.Instance.Despawn(go,1f);
         }
         // 분열체를 소유 레인 카운트에 미리 더한다(각자 죽을 때 EnemyDieEvent 감소와 상쇄 → 전멸 시 정확히 0).
