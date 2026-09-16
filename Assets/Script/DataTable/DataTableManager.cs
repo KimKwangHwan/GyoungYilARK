@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public static class DataTableManager
@@ -10,6 +10,8 @@ public static class DataTableManager
     public static SkillTable SkillTable => Get<SkillTable>(DataTableIds.Skill);
     public static PortalTable PortalTable => Get<PortalTable>(DataTableIds.Portal);
     public static DebuffTable DebuffTable => Get<DebuffTable>(DataTableIds.Debuff);
+    public static EnemyScaleTable EnemyScaleTable => Get<EnemyScaleTable>(DataTableIds.EnemyScale);
+    public static EnemyScaleConfigTable EnemyScaleConfigTable => Get<EnemyScaleConfigTable>(DataTableIds.EnemyScaleConfig);
     static DataTableManager()
     {
         Init();
@@ -36,6 +38,13 @@ public static class DataTableManager
         var debuffTable = new DebuffTable();
         debuffTable.Load(DataTableIds.Debuff);
         tables.Add(DataTableIds.Debuff, debuffTable);
+        // 적 스탯 배율 — EnemyStatScaling이 매번 읽는다(예전엔 그 파일에 하드코딩돼 있던 표).
+        var enemyScaleTable = new EnemyScaleTable();
+        enemyScaleTable.Load(DataTableIds.EnemyScale);
+        tables.Add(DataTableIds.EnemyScale, enemyScaleTable);
+        var enemyScaleConfigTable = new EnemyScaleConfigTable();
+        enemyScaleConfigTable.Load(DataTableIds.EnemyScaleConfig);
+        tables.Add(DataTableIds.EnemyScaleConfig, enemyScaleConfigTable);
     }
     public static T Get<T>(string id) where T : DataTable
     {

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 public enum Language
 {
     Kr = 0,
@@ -16,4 +16,6 @@ public static class DataTableIds
     public static readonly string Debuff = "DebuffTable";
     public static readonly string Hero = "HeroTable";
     public static readonly string HeroStat = "HeroStatTable";
+    public static readonly string EnemyScale = "EnemyScaleTable";
+    public static readonly string EnemyScaleConfig = "EnemyScaleConfigTable";
 }

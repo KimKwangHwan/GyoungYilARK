@@ -1,0 +1,9 @@
+Key,Value
+BossStatStepRounds,10
+BossStatDeepenDay,100
+BossHpStepEarly,2.5
+BossHpStepLate,6
+BossAttackStepEarly,0.2
+BossAttackStepLate,0.6
+BossDefenseStepEarly,0.5
+BossDefenseStepLate,1.5
