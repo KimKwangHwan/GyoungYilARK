@@ -1,6 +1,6 @@
 # PioneerOfFelucia
 
-> 낮에는 마을을 세우고, 밤에는 그리드에 배치한 영웅으로 웨이브를 막는 **시티빌딩 × 그리드 타워디펜스** 하이브리드.
+> 낮에는 마을을 세우고, 밤에는 그리드에 배치한 영웅으로 웨이브를 막는 타워 디펜스 게임
 
 ![Unity](https://img.shields.io/badge/Unity-6000.3.15f1-black?logo=unity)
 ![Language](https://img.shields.io/badge/C%23-239120?logo=csharp&logoColor=white)
@@ -24,11 +24,22 @@
 
 | 항목 | 내용 |
 | --- | --- |
-| 장르 | 시티빌딩 × 그리드 타워디펜스 하이브리드 |
-| 플랫폼 | PC (세로 화면) |
+| 장르 | 타워디펜스 |
+| 플랫폼 | PC |
 | 팀 구성 | 프로그래머 4인 |
 | 개발 기간 | 2026.07 ~ 2026.09 |
 | 엔진 | Unity `6000.3.15f1` (Unity 6.3) / URP `17.3` |
+
+---
+
+## 기술 스택
+
+`Unity 6.3` · `C#` · `URP 17.3` · `Shader Graph` · `VFX Graph`
+[`VContainer`](https://github.com/hadashiA/VContainer) (DI) · [`UniTask`](https://github.com/Cysharp/UniTask) (비동기) · `NuGetForUnity`
+
+상태 전이는 게임/영웅 모두 직접 구현한 FSM, 이벤트는 C# `event` 기반이다.
+
+---
 
 ## 게임 구성
 
@@ -169,49 +180,4 @@ graph TD
     MB -->|타일 사거리·타겟팅| HERO
 
     style 영웅 fill:#1f6feb22,stroke:#1f6feb
-```
-
----
-
-## 기술 스택
-
-`Unity 6.3` · `C#` · `URP 17.3` · `Shader Graph` · `VFX Graph`
-[`VContainer`](https://github.com/hadashiA/VContainer) (DI) · [`UniTask`](https://github.com/Cysharp/UniTask) (비동기) · `NuGetForUnity`
-
-상태 전이는 게임/영웅 모두 직접 구현한 FSM, 이벤트는 C# `event` 기반이다.
-
----
-
-## 코드 하이라이트
-
-설계 의도가 드러나는 인터페이스만 발췌 (구현 생략).
-
-```csharp
-// "결정된 AttackDataSO 한 방을 어떤 '시간적 형태'로 집행하는가" — Discrete(1회) vs Continuous(채널링).
-// executor(무엇으로 때리는가)와 독립된 축. hero 를 함께 받는 이유: AttackContext 는 struct 라
-// 넘겨받은 ctx 는 호출 시점 스냅샷이라, 몇 초 도는 채널링 중 "지금 살아있는" 타겟을 다시 확인하려면
-// hero 를 직접 들고 있어야 한다.
-public interface IAttackDeliveryStrategy
-{
-    UniTask Deliver(Hero hero, AttackDataSO data, AttackContext ctx,
-                    IAttackExecutor executor, CancellationToken ct);
-}
-
-// "무엇으로 때리는가" — 근접 / 원거리(투사체) / 힐. 클래스별 AttackState 가 주입한다.
-public interface IAttackExecutor
-{
-    UniTask Execute(AttackDataSO data, AttackContext ctx, CancellationToken ct);
-}
-
-// 트레잇은 SO 가 아니라 같은 프리팹에 붙는 컴포넌트다 — Hero.Awake 가 GetComponents 로 수집하고
-// 공격/피격/처치/낮 시작 등의 시점에 훅을 팬아웃한다. 새 특성 = 클래스 하나 + 프리팹에 부착.
-public abstract class HeroTrait : MonoBehaviour
-{
-    public virtual void OnAttackPerformed(AttackDataSO data) { }
-    public virtual void OnAttackResolved(AttackDataSO data) { }
-    public virtual void OnHit(GameObject target, int amount, bool isCrit) { }
-    public virtual void OnKill(GameObject target) { }
-    public virtual void OnPassiveTick(float deltaTime) { }
-    public virtual void OnDayStart() { }
-}
 ```
